@@ -81,7 +81,14 @@ class Account(models.Model):
         db_table = 'accounts'
 
     def __str__(self):
-        return f'{self.balance}'
+        return f'{self.customer} - {self.name} - {self.balance}'
+
+    def check_balance(self):
+        transactions = Ledger.objects.filter(to_account=self)
+        balance = 0
+        for transaction in transactions:
+            balance += transaction.amount
+        return balance
 
 
 class Ledger(models.Model):
@@ -103,9 +110,12 @@ class Ledger(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'transactions'
+        db_table = 'ledger'
 
-    @transaction
+    def __str__(self):
+        return f'${self.transaction_id}: ${self.type} from {self.from_account}, to {self.to_account}, amount {self.amount}'
+
+    @transaction.atomic
     def make_bank_transaction(self, to_acc, from_acc, transaction_amount):
         try:
             id = uuid.uuid4()
@@ -122,7 +132,7 @@ class Ledger(models.Model):
                 transaction_id=id,
                 to_account=from_acc,
                 from_account=to_acc,
-                amount=transaction_amount,
+                amount=-transaction_amount,
                 type='Debit',
                 updated_at=time.now(),
                 created_at=time.now()

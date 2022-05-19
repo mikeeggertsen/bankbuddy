@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 
 from base.models import Account
 
+
 @login_required
 def dashboard(request):
     context = {}
@@ -13,6 +14,7 @@ def dashboard(request):
 
 # ACCOUNTS
 
+
 @login_required
 def accounts(request):
     context = {}
@@ -20,14 +22,17 @@ def accounts(request):
     context['accounts'] = accounts
     return render(request, 'base/account_list.html', context)
 
+
 @login_required
 def transactions(request):
     return HttpResponse('transactions')
+
 
 @login_required
 def profile(request):
     return HttpResponse('profile')
 
+
 @login_required
-def settings(request): 
+def settings(request):
     pass
