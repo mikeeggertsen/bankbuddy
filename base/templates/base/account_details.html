@@ -1,0 +1,51 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <div class="flex flex-col w-full p-6">
+        <h1 class="text-2xl font-semibold">Account history</h1>
+        <div class="w-full mt-4 h-40 bg-gradient-to-r from-[#485563] to-[#29323c] shadow-xl rounded-lg p-6 flex flex-col justify-between gap-6">
+            <h2 class="text-xl text-white font-semibold">{{account.name}}</h2>
+            <div>
+                <p class="text-[12px] text-white font-light">Total balance</p>
+                <h3 class="text-lg text-white font-semibold">${{account.balance}}</h3>
+            </div>
+        </div>
+        <h3 class="text-md font-semibold my-2">Details</h3>
+        <div class="flex flex-row gap-16">
+           <div>
+                <p class="text-sm font-semibold">Account type</p>
+                <div class="text-[12px] text-gray-400 flex flex-row items-center gap-1">
+                {% if account.type == 0%}
+                    <i class="fa-solid fa-credit-card"></i>
+                {% elif account.type == 1%}
+                <i class="fa-solid fa-sack-dollar"></i>
+                {% else %}
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                {% endif %}
+                <p>{{account.get_type_display}}</p>
+                </div>
+           </div>
+           <div>
+                <p class="text-sm font-semibold">Account no.</p>
+                <p class="text-[12px] text-gray-400">{{account.account_no}}</p>
+           </div>
+        </div>
+        <h3 class="text-md font-semibold my-2">Transactions</h3>
+      <div class="flex flex-col gap-4">
+        {% for transaction in transactions %}
+        <div class="flex flex-row w-full items-center gap-4">
+            <i class="fa-solid fa-credit-card"></i>
+            <div class="w-full">
+                <h4 class="text-sm font-semibold">{{transaction.message}}</h4>
+                <p class="text-[12px] text-gray-400">{{account.created_at|date:"d M Y"}}</p>
+            </div>
+            {% if transaction.type == 1 %}
+                <p class="text-sm font-semibold text-green-600">+${{transaction.amount}}</p>
+            {% else %}
+                <p class="text-sm font-semibold text-red-600">-${{transaction.amount}}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+{% endblock %}
