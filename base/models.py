@@ -68,7 +68,8 @@ class Account(models.Model):
         (SALARY, 'Salary'),
     ]
 
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='customer')
+    customer = models.ForeignKey(
+        Customer, on_delete=models.CASCADE, related_name='customer')
     name = models.CharField(max_length=255)
     account_no = models.IntegerField(unique=True)
     balance = models.DecimalField(decimal_places=2, max_digits=12, default=0)
@@ -84,7 +85,7 @@ class Account(models.Model):
             numOfAccounts = Account.objects.all().count()
             self.account_no = settings.START_ACCOUNT_NO + numOfAccounts
         super(Account, self).save(*args, **kwargs)
-        
+
     def __str__(self):
         return f'{self.customer} - {self.name} - {self.balance}'
 
@@ -92,7 +93,10 @@ class Account(models.Model):
         transactions = Ledger.objects.filter(to_account=self)
         balance = 0
         for transaction in transactions:
-            balance += transaction.amount
+            if transaction.type == 1:
+                balance += transaction.amount
+            else:
+                balance -= transaction.amount
         return balance
 
 
@@ -140,7 +144,7 @@ class Ledger(models.Model):
                     transaction_id=id,
                     to_account=from_acc,
                     from_account=to_acc,
-                    amount=-transaction_amount,
+                    amount=transaction_amount,
                     type=self.DEBIT,
                     updated_at=time.now(),
                     created_at=time.now(),
