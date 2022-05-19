@@ -7,6 +7,15 @@ from django.conf import settings
 from base.managers import UserManager
 
 
+class Bank(models.Model):
+    id = models.CharField(max_length=100, primary_key=True)
+    name = models.CharField(max_length=100)
+    external = models.BooleanField()
+
+    def __str__(self):
+        return f'{self.id}: {self.name}'
+
+
 class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
@@ -118,6 +127,7 @@ class Ledger(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     message = models.CharField(max_length=100)
+    bank_id = models.ForeignKey(Bank, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'ledger'
