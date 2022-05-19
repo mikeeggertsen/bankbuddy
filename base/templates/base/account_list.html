@@ -1,7 +1,26 @@
-{%extends 'main.html'%}
-
-{% block content%}
-    {% for account in accounts %}
-        <h1>{{account}}</h1>
-    {% endfor %}
-{% endblock content %}
+{% extends 'main.html' %} {% block content%}
+<div>
+  <div class="flex flex-col h-full w-full p-6 pb-20">
+    <h1 class="text-2xl font-semibold">Accounts</h1>
+    <div class="h-full overflow-auto">
+      {% for account in accounts%}
+      <a
+        href="/accounts/{{account.account_no}}"
+        class="w-full mt-4 h-40 bg-gradient-to-r from-[#485563] to-[#29323c] shadow-xl rounded-lg p-6 flex flex-col justify-between gap-6"
+      >
+        <h2 class="text-xl text-white font-semibold">{{account.name}}</h2>
+        <div>
+          <p class="text-[12px] text-white font-light">Total balance</p>
+          <h3 class="text-lg text-white font-semibold">${{account.balance}}</h3>
+        </div>
+      </a>
+      {% empty %}
+        <p>You have no accounts. Please create one</p>
+      {% endfor %}
+    </div>
+    <a href="/accounts/new" class="bg-primary fixed bottom-20 right-6 flex items-center justify-center rounded-full w-12 h-12 z-10 shadow-2xl">
+      <i class="fa-solid fa-plus text-2xl text-white"></i>
+    </a>
+  </div>
+  {% endblock content %}
+</div>
