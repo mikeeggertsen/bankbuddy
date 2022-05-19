@@ -81,7 +81,7 @@ class Account(models.Model):
 
     def save(self, *args, **kwargs):
         self.balance = 0
-        numOfAccounts = Account.objects.filter(customer=self.customer).count()
+        numOfAccounts = Account.objects.all().count()
         self.account_no = settings.START_ACCOUNT_NO + numOfAccounts + 1
         super(Account, self).save(*args, **kwargs)
         
