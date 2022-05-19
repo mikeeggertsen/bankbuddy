@@ -1,6 +1,7 @@
 import email
 from time import time
 import uuid
+from webbrowser import get
 from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
 
@@ -117,32 +118,47 @@ class Ledger(models.Model):
 
     @transaction.atomic
     def make_bank_transaction(self, to_acc, from_acc, transaction_amount):
-        try:
-            id = uuid.uuid4()
-            Ledger.objects.create(
-                transaction_id=id,
-                to_account=to_acc,
-                from_account=from_acc,
-                amount=transaction_amount,
-                type='Credit',
-                updated_at=time.now(),
-                created_at=time.now()
-            )
-            Ledger.objects.create(
-                transaction_id=id,
-                to_account=from_acc,
-                from_account=to_acc,
-                amount=-transaction_amount,
-                type='Debit',
-                updated_at=time.now(),
-                created_at=time.now()
-            )
-            return True
-        except:
-            return False
+        if from_acc.check_balance() >= transaction_amount:
+            try:
+                id = uuid.uuid4()
+                Ledger.objects.create(
+                    transaction_id=id,
+                    to_account=to_acc,
+                    from_account=from_acc,
+                    amount=transaction_amount,
+                    type='Credit',
+                    updated_at=time.now(),
+                    created_at=time.now()
+                )
+                Ledger.objects.create(
+                    transaction_id=id,
+                    to_account=from_acc,
+                    from_account=to_acc,
+                    amount=-transaction_amount,
+                    type='Debit',
+                    updated_at=time.now(),
+                    created_at=time.now()
+                )
+                return True
+            except:
+                return False
+        print(
+            f'Failed to make transaction from: {from_acc.account_no} to: {to_acc.account_no} due to insuffiecient funds.')
+        return False
 
 
 class Loan(models.Model):
+    PENDING = 1
+    APPROVED = 2
+    REJECTED = 3
+    STATUS_TYPES = [
+        (PENDING, 'Pending'),
+        (APPROVED, 'Approved'),
+        (REJECTED, 'Rejected')
+    ]
+
+    status = models.PositiveSmallIntegerField(
+        choices=STATUS_TYPES, default=PENDING)
     customer = models.ForeignKey(
         Customer, on_delete=models.CASCADE, related_name='loans',)
     amount = models.DecimalField(decimal_places=2, max_digits=12)
