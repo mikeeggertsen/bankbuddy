@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+{% load static %}
+{% load tailwind_tags %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% tailwind_css %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
+    <script src="{% static 'js/navbar.js' %}"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <link
+      href="{% static 'fontawesomefree/css/all.min.css' %}"
+      rel="stylesheet"
+      type="text/css"
+    />
+    
+    <title>Bank Buddy</title>
+  </head>
+  <body>
+    <div class="w-screen h-screen bg-ghostwhite">
+      {%block content%}
+      
+      {%endblock%}
+      {% if user.is_authenticated %}
+        {% include 'sidebar.html' %}
+        {% include 'bottombar.html' %}
+      {% endif %}
+    </div>
+  </body>
+  </html>

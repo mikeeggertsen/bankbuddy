@@ -1,0 +1,7 @@
+{%extends 'main.html'%}
+
+{% block content%}
+    {% for account in accounts %}
+        <h1>{{account}}</h1>
+    {% endfor %}
+{% endblock content %}

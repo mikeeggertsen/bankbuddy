@@ -1,0 +1,81 @@
+{% extends 'main.html' %}
+
+{% block content %}
+    <div class="flex flex-col h-full w-full p-6 gap-4">
+        <div>
+            <div class="flex flex-row justify-between items-center w-full">
+                <h1 class="text-2xl font-semibold">Accounts</h1>
+                <a href="#"><p class="text-[12px] text-gray-400">View all<i class="ml-2 fa-solid fa-chevron-right"></i></p></a>
+            </div>
+            <div class="w-full mt-4 h-fit bg-gradient-to-r from-[#485563] to-[#29323c] shadow-xl rounded-lg px-6 py-2 flex flex-col gap-6">
+                <h2 class="text-xl text-white font-semibold">My savings</h2>
+                <div>
+                    <p class="text-[12px] text-white font-light">Total balance</p>
+                    <h3 class="text-lg text-white font-semibold">$5,672,00</h3>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="flex flex-row justify-between items-center w-full">
+                <h1 class="text-2xl font-semibold">Transactions</h1>
+                <a href="#"><p class="text-[12px] text-gray-400">View all<i class="ml-2 fa-solid fa-chevron-right"></i></p></a>
+            </div>
+            <div>
+                <div id="transaction-options" class="flex flex-row gap-4 mt-2">
+                    <a class="relative text-sm font-normal transaction-option-active" href="#">
+                        <h5>All</h5>
+                    </a>
+                    <a class="relative text-sm font-normal" href="#">
+                        <h5>Incoming</h5>
+                    </a>
+                    <a class="relative text-sm font-normal" href="#">
+                        <h5>Expenses</h5>
+                    </a>
+                </div>
+                <div class="flex flex-col gap-4 mt-4">
+                    <div class="flex flex-row items-center justify-between">
+                        <div class="flex flex-row items-center gap-4">
+                            <i class="fa-solid fa-credit-card"></i>
+                            <div>
+                                <h4 class="text-sm font-semibold">Nike store</h4>
+                                <p class="text-[12px] text-gray-400">Nike</p>
+                            </div>
+                        </div>
+                        <p class="text-sm font-semibold">-$100,00</p>
+                    </div>
+                    <div class="flex flex-row items-center justify-between">
+                        <div class="flex flex-row items-center gap-4">
+                            <i class="fa-solid fa-credit-card"></i>
+                            <div>
+                                <h4 class="text-sm font-semibold">Nike store</h4>
+                                <p class="text-[12px] text-gray-400">Nike</p>
+                            </div>
+                        </div>
+                        <p class="text-sm font-semibold">-$100,00</p>
+                    </div>
+                    <div class="flex flex-row items-center justify-between">
+                        <div class="flex flex-row items-center gap-4">
+                            <i class="fa-solid fa-credit-card"></i>
+                            <div>
+                                <h4 class="text-sm font-semibold">Nike store</h4>
+                                <p class="text-[12px] text-gray-400">Nike</p>
+                            </div>
+                        </div>
+                        <p class="text-sm font-semibold">-$100,00</p>
+                    </div>
+                    <div class="flex flex-row items-center justify-between">
+                        <div class="flex flex-row items-center gap-4">
+                            <i class="fa-solid fa-credit-card"></i>
+                            <div>
+                                <h4 class="text-sm font-semibold">Nike store</h4>
+                                <p class="text-[12px] text-gray-400">Nike</p>
+                            </div>
+                        </div>
+                        <p class="text-sm font-semibold">-$100,00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+{%endblock%}
