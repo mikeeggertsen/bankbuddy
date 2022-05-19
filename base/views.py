@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from base.forms import AccountCreationForm
 from django.urls import reverse
 
-from base.models import Account, Customer
+from base.models import Account, Customer, Ledger
 
 
 @login_required
@@ -28,7 +28,9 @@ def account_details(request, account_no):
     context = {}
     customer = get_object_or_404(Customer, pk=request.user.id)
     account = get_object_or_404(Account, customer=customer, account_no=account_no)
+    transactions = Ledger.objects.filter(to_account=account)
     context["account"] = account
+    context["transactions"] = transactions
     return render(request, 'base/account_details.html', context)
 
 def create_account(request): 
