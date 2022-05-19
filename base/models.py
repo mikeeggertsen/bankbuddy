@@ -71,7 +71,7 @@ class Account(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='customer')
     name = models.CharField(max_length=255)
     account_no = models.IntegerField(unique=True)
-    balance = models.DecimalField(decimal_places=2, max_digits=12)
+    balance = models.DecimalField(decimal_places=2, max_digits=12, default=0)
     type = models.PositiveSmallIntegerField(choices=ACCOUNT_TYPES)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -80,9 +80,9 @@ class Account(models.Model):
         db_table = 'accounts'
 
     def save(self, *args, **kwargs):
-        self.balance = 0
-        numOfAccounts = Account.objects.all().count()
-        self.account_no = settings.START_ACCOUNT_NO + numOfAccounts + 1
+        if self.account_no is None:
+            numOfAccounts = Account.objects.all().count()
+            self.account_no = settings.START_ACCOUNT_NO + numOfAccounts
         super(Account, self).save(*args, **kwargs)
         
     def __str__(self):
@@ -131,7 +131,7 @@ class Ledger(models.Model):
                     to_account=to_acc,
                     from_account=from_acc,
                     amount=transaction_amount,
-                    type='Credit',
+                    type=self.CREDIT,
                     updated_at=time.now(),
                     created_at=time.now(),
                     message=receiver_message
@@ -141,7 +141,7 @@ class Ledger(models.Model):
                     to_account=from_acc,
                     from_account=to_acc,
                     amount=-transaction_amount,
-                    type='Debit',
+                    type=self.DEBIT,
                     updated_at=time.now(),
                     created_at=time.now(),
                     message=own_message
