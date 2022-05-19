@@ -1,9 +1,8 @@
-import email
 from time import time
 import uuid
-from webbrowser import get
 from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
 from base.managers import UserManager
 
@@ -69,9 +68,8 @@ class Account(models.Model):
         (SALARY, 'Salary'),
     ]
 
-    customer = models.ForeignKey(
-        Customer, on_delete=models.CASCADE, related_name='customer')
-    name = models.CharField(max_length=255, default=CHECKING)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='customer')
+    name = models.CharField(max_length=255)
     account_no = models.IntegerField(unique=True)
     balance = models.DecimalField(decimal_places=2, max_digits=12)
     type = models.PositiveSmallIntegerField(choices=ACCOUNT_TYPES)
@@ -81,6 +79,12 @@ class Account(models.Model):
     class Meta:
         db_table = 'accounts'
 
+    def save(self, *args, **kwargs):
+        self.balance = 0
+        numOfAccounts = Account.objects.filter(customer=self.customer).count()
+        self.account_no = settings.START_ACCOUNT_NO + numOfAccounts + 1
+        super(Account, self).save(*args, **kwargs)
+        
     def __str__(self):
         return f'{self.customer} - {self.name} - {self.balance}'
 
