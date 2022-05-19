@@ -109,6 +109,7 @@ class Ledger(models.Model):
     type = models.PositiveSmallIntegerField(choices=TRANSACTION_TYPES)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    message = models.CharField(max_length=100)
 
     class Meta:
         db_table = 'ledger'
@@ -117,7 +118,7 @@ class Ledger(models.Model):
         return f'${self.transaction_id}: ${self.type} from {self.from_account}, to {self.to_account}, amount {self.amount}'
 
     @transaction.atomic
-    def make_bank_transaction(self, to_acc, from_acc, transaction_amount):
+    def make_bank_transaction(self, to_acc, from_acc, transaction_amount, own_message, receiver_message):
         if from_acc.check_balance() >= transaction_amount:
             try:
                 id = uuid.uuid4()
@@ -128,7 +129,8 @@ class Ledger(models.Model):
                     amount=transaction_amount,
                     type='Credit',
                     updated_at=time.now(),
-                    created_at=time.now()
+                    created_at=time.now(),
+                    message=receiver_message
                 )
                 Ledger.objects.create(
                     transaction_id=id,
@@ -137,7 +139,8 @@ class Ledger(models.Model):
                     amount=-transaction_amount,
                     type='Debit',
                     updated_at=time.now(),
-                    created_at=time.now()
+                    created_at=time.now(),
+                    message=own_message
                 )
                 return True
             except:
