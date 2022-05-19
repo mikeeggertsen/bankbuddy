@@ -19,7 +19,7 @@ def sign_in(request):
         user = authenticate(request, email=email, password=password)
         if user:
             login(request, user)
-            return HttpResponseRedirect(reverse("base:accounts"))
+            return HttpResponseRedirect(reverse("base:dashboard"))
         else:
             context["error"] = "Bad username or password"
     return render(request, "authsystem/sign_in.html", context)
