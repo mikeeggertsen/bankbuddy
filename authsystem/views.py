@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from authsystem.forms import CustomerCreationForm, UserSignInForm
 from base.models import Customer
 
+
 def sign_in(request):
     context = {}
 
@@ -23,9 +24,11 @@ def sign_in(request):
             context["error"] = "Bad username or password"
     return render(request, "authsystem/sign_in.html", context)
 
+
 def sign_out(request):
     logout(request)
     return render(request, "authsystem/sign_in.html")
+
 
 def sign_up(request):
     context = {}
@@ -36,7 +39,7 @@ def sign_up(request):
     context["form"] = CustomerCreationForm()
     if request.method == "POST":
         form = CustomerCreationForm(request.POST)
-        if form.is_valid(request.POST): 
+        if form.is_valid():
             first_name = request.POST["first_name"]
             last_name = request.POST["last_name"]
             phone = request.POST["phone"]
@@ -44,10 +47,10 @@ def sign_up(request):
             password = request.POST["password"]
             try:
                 Customer.objects.create_user(
-                    email, 
+                    email,
                     password,
-                    first_name=first_name, 
-                    last_name=last_name, 
+                    first_name=first_name,
+                    last_name=last_name,
                     phone=phone,
                 )
                 return HttpResponseRedirect(reverse('authsystem:sign_in'))
@@ -56,6 +59,7 @@ def sign_up(request):
         else:
             context["error"] = "Unable to create customer account. Please try again"
     return render(request, "authsystem/sign_up.html", context)
+
 
 def password_reset(request):
     pass
