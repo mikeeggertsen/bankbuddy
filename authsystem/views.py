@@ -10,9 +10,8 @@ def sign_in(request):
     context = {}
 
     if request.user.is_authenticated:
-        return redirect(reverse("base:accounts"))
+        return redirect(reverse("base:dashboard"))
 
-    context["form"] = UserSignInForm()
     if request.method == "POST":
         email = request.POST["email"]
         password = request.POST["password"]
@@ -22,19 +21,21 @@ def sign_in(request):
             return HttpResponseRedirect(reverse("base:dashboard"))
         else:
             context["error"] = "Bad username or password"
+    
+    context["form"] = UserSignInForm()
     return render(request, "authsystem/sign_in.html", context)
 
 
 def sign_out(request):
     logout(request)
-    return render(request, "authsystem/sign_in.html")
+    return HttpResponseRedirect(reverse("authsystem:sign_in"))
 
 
 def sign_up(request):
     context = {}
 
     if request.user.is_authenticated:
-        return redirect(reverse("base:accounts"))
+        return redirect(reverse("base:dashboard"))
 
     if request.method == "POST":
         form = CustomerCreationForm(request.POST)
