@@ -11,15 +11,18 @@ from base.models import Account, Bank, Customer, Ledger
 def dashboard(request):
     transaction_filter = request.GET.get('q', '')
     context = {}
-    account = Account.objects.filter(customer__id=request.user.id)[:1].get()
-    transactions = Ledger.objects.filter(to_account__customer__id=request.user.id)
-    if transaction_filter == "credit":
-        transactions = transactions.filter(type=1)
-    elif transaction_filter == "debit":
-        transactions= transactions.filter(type=2)
+    try: 
+        account = Account.objects.filter(customer__id=request.user.id)[:1].get()
+        transactions = Ledger.objects.filter(to_account__customer__id=request.user.id)
+        if transaction_filter == "credit":
+            transactions = transactions.filter(type=1)
+        elif transaction_filter == "debit":
+            transactions= transactions.filter(type=2)
+        context['account'] = account 
+        context['transactions'] = transactions
+    except:
+        pass
 
-    context['account'] = account 
-    context['transactions'] = transactions[:5] 
     return render(request, 'base/dashboard.html', context)
 
 # ACCOUNTS

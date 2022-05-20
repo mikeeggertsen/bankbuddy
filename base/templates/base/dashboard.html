@@ -7,6 +7,7 @@
                 <h1 class="text-2xl font-semibold">Accounts</h1>
                 <a href="/accounts"><p class="text-[12px] text-gray-400">View all<i class="ml-2 fa-solid fa-chevron-right"></i></p></a>
             </div>
+            {% if account %}
             <div class="w-full mt-4 h-40 bg-gradient-to-r from-[#485563] to-[#29323c] shadow-xl rounded-lg p-6 flex flex-col justify-between gap-6">
                 <h2 class="text-xl text-white font-semibold">{{account.name}}</h2>
                 <div>
@@ -14,6 +15,9 @@
                     <h3 class="text-lg text-white font-semibold">{{account.balance}}</h3>
                 </div>
             </div>
+            {% else %}
+                <a class="text-primary text-sm" href="/accounts/new">Create an account</a>
+            {% endif %}
         </div>
         <div>
             <h1 class="text-2xl font-semibold">Transactions</h1>
