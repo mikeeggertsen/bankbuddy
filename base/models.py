@@ -13,7 +13,7 @@ class Bank(models.Model):
     external = models.BooleanField()
 
     def __str__(self):
-        return f'{self.id}: {self.name}'
+        return f'{self.name}'
 
 
 class User(AbstractUser):
@@ -85,18 +85,17 @@ class Account(models.Model):
     type = models.PositiveSmallIntegerField(choices=ACCOUNT_TYPES)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         db_table = 'accounts'
 
     def save(self, *args, **kwargs):
         if self.account_no is None:
             numOfAccounts = Account.objects.all().count()
-            self.account_no = settings.START_ACCOUNT_NO + numOfAccounts
+            self.account_no = settings.START_ACCOUNT_NO + numOfAccounts + 1
         super(Account, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.customer} - {self.name} - {self.balance}'
+        return f'{self.name} - ${self.balance}'
 
     def check_balance(self):
         transactions = Ledger.objects.filter(to_account=self)
@@ -117,6 +116,7 @@ class Ledger(models.Model):
         (DEBIT, 'Debit'),
     ]
 
+    bank = models.ForeignKey(Bank, on_delete=models.CASCADE, blank=True)
     transaction_id = models.CharField(max_length=50)
     to_account = models.ForeignKey(
         Account, on_delete=models.CASCADE, related_name='to_account')
@@ -124,45 +124,41 @@ class Ledger(models.Model):
         Account, on_delete=models.CASCADE, related_name='from_account')
     amount = models.DecimalField(decimal_places=2, max_digits=12)
     type = models.PositiveSmallIntegerField(choices=TRANSACTION_TYPES)
+    message = models.CharField(max_length=100)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    message = models.CharField(max_length=100)
-    bank_id = models.ForeignKey(Bank, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'ledger'
 
     def __str__(self):
-        return f'${self.transaction_id}: ${self.type} from {self.from_account}, to {self.to_account}, amount {self.amount}'
+        return f'{self.TRANSACTION_TYPES[self.type - 1][1]} - From {self.from_account} -> To {self.to_account} Amount ${self.amount}'
 
     @transaction.atomic
-    def make_bank_transaction(self, to_acc, from_acc, transaction_amount, own_message, receiver_message):
+    def make_bank_transaction(self, to_acc, from_acc, transaction_amount, own_message, message, bank):
         if from_acc.check_balance() >= transaction_amount:
-            try:
                 id = uuid.uuid4()
-                Ledger.objects.create(
+                credit = Ledger.objects.create(
                     transaction_id=id,
                     to_account=to_acc,
                     from_account=from_acc,
                     amount=transaction_amount,
                     type=self.CREDIT,
-                    updated_at=time.now(),
-                    created_at=time.now(),
-                    message=receiver_message
+                    message=message,
+                    bank=bank
                 )
-                Ledger.objects.create(
+                debit = Ledger.objects.create(
                     transaction_id=id,
                     to_account=from_acc,
                     from_account=to_acc,
                     amount=transaction_amount,
                     type=self.DEBIT,
-                    updated_at=time.now(),
-                    created_at=time.now(),
-                    message=own_message
+                    message=own_message,
+                    bank=bank
                 )
+                credit.save()
+                debit.save()
                 return True
-            except:
-                return False
         print(
             f'Failed to make transaction from: {from_acc.account_no} to: {to_acc.account_no} due to insuffiecient funds.')
         return False
