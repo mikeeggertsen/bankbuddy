@@ -10,4 +10,5 @@ urlpatterns = [
     path("accounts/<int:account_no>", views.account_details, name="account"),
     path("transactions/", views.transactions, name="transactions"),
     path("profile/", views.profile, name="profile"),
+    path("transfer-request/", views.transfer_request, name="transfer_request")
 ]

@@ -1,6 +1,11 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from email import message
+import json
+import os
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from pkg_resources import require
 from base.forms import AccountCreationForm
 from django.urls import reverse
 
@@ -14,6 +19,8 @@ def dashboard(request):
     return render(request, 'base/dashboard.html', context)
 
 # ACCOUNTS
+
+
 @login_required
 def accounts(request):
     context = {}
@@ -24,16 +31,18 @@ def accounts(request):
 
 
 @login_required
-def account_details(request, account_no): 
+def account_details(request, account_no):
     context = {}
     customer = get_object_or_404(Customer, pk=request.user.id)
-    account = get_object_or_404(Account, customer=customer, account_no=account_no)
+    account = get_object_or_404(
+        Account, customer=customer, account_no=account_no)
     transactions = Ledger.objects.filter(to_account=account)
     context["account"] = account
     context["transactions"] = transactions
     return render(request, 'base/account_details.html', context)
 
-def create_account(request): 
+
+def create_account(request):
     context = {}
     form = AccountCreationForm()
     context["form"] = form
@@ -48,6 +57,7 @@ def create_account(request):
 
     return render(request, "base/account_create.html", context)
 
+
 @login_required
 def transactions(request):
     return HttpResponse('transactions')
@@ -61,3 +71,31 @@ def profile(request):
 @login_required
 def settings(request):
     pass
+
+
+@csrf_exempt
+def transfer_request(request):
+    if request.method == "POST":
+        body = request.body.decode("utf-8")
+        data = json.loads(body)
+
+        if 'Token' not in request.headers:
+            response = {
+                "message": "Provide bank token",
+                "status": False
+            }
+            return JsonResponse(response, status=404)
+
+        if request.headers['Token'] != os.environ['BANK_CONTROLLER_TOKEN']:
+            response = {
+                "message": "Not correct token",
+                "status": False
+            }
+            return JsonResponse(response, status=405)
+
+        response = {
+            "message": "yo",
+            "status": False
+        }
+
+        return JsonResponse(response, status=200)
