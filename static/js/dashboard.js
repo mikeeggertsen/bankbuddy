@@ -1,6 +1,12 @@
 $(document).ready(() => {
-  $('#transaction-options a').click(function () {
-    $('#transaction-options a').removeClass('transaction-option-active');
-    $(this).addClass('transaction-option-active');
-  });
+  $('.transaction-option-active').removeClass('transaction-option-active');
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const q = urlSearchParams.get('q');
+  if (q === 'credit') {
+    $('#credit-transactions').addClass('transaction-option-active');
+  } else if (q === 'debit') {
+    $('#debit-transactions').addClass('transaction-option-active');
+  } else {
+    $('#all-transactions').addClass('transaction-option-active');
+  }
 });
