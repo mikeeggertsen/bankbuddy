@@ -15,11 +15,9 @@ class UserSignInForm(ModelForm):
         fields = ["email", "password"]
         widgets = {
             "email": TextInput(attrs={
-                "class": "w-full bg-white border rounded-md shadow",
                 "placeholder": "Enter your email",
             }),
             "password": PasswordInput(attrs={
-                "class": "w-full bg-white border rounded-md shadow",
                 "placeholder": "Password",
             })
         }
