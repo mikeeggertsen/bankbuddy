@@ -8,71 +8,46 @@
                 <a href="/accounts"><p class="text-[12px] text-gray-400">View all<i class="ml-2 fa-solid fa-chevron-right"></i></p></a>
             </div>
             <div class="w-full mt-4 h-40 bg-gradient-to-r from-[#485563] to-[#29323c] shadow-xl rounded-lg p-6 flex flex-col justify-between gap-6">
-                <h2 class="text-xl text-white font-semibold">My savings</h2>
+                <h2 class="text-xl text-white font-semibold">{{account.name}}</h2>
                 <div>
                     <p class="text-[12px] text-white font-light">Total balance</p>
-                    <h3 class="text-lg text-white font-semibold">$5,672,00</h3>
+                    <h3 class="text-lg text-white font-semibold">{{account.balance}}</h3>
                 </div>
             </div>
         </div>
         <div>
-            <div class="flex flex-row justify-between items-center w-full">
-                <h1 class="text-2xl font-semibold">Transactions</h1>
-                <a href="#"><p class="text-[12px] text-gray-400">View all<i class="ml-2 fa-solid fa-chevron-right"></i></p></a>
-            </div>
+            <h1 class="text-2xl font-semibold">Transactions</h1>
             <div>
                 <div id="transaction-options" class="flex flex-row gap-4 mt-2">
-                    <a class="relative text-sm font-normal transaction-option-active" href="#">
+                    <a href="/dashboard/" id="all-transactions" class="relative text-sm font-normal" href="#">
                         <h5>All</h5>
                     </a>
-                    <a class="relative text-sm font-normal" href="#">
+                    <a href="/dashboard/?q=credit" id="credit-transactions" class="relative text-sm font-normal" href="#">
                         <h5>Incoming</h5>
                     </a>
-                    <a class="relative text-sm font-normal" href="#">
+                    <a href="/dashboard/?q=debit" id="debit-transactions" class="relative text-sm font-normal" href="#">
                         <h5>Expenses</h5>
                     </a>
                 </div>
                 <div class="flex flex-col gap-4 mt-4">
+                    {% for transaction in transactions %}
                     <div class="flex flex-row items-center justify-between">
                         <div class="flex flex-row w-full items-center gap-4">
                             <i class="fa-solid fa-credit-card"></i>
                             <div class="w-full">
-                                <h4 class="text-sm font-semibold">Nike store</h4>
-                                <p class="text-[12px] text-gray-400">Nike</p>
+                                <h4 class="text-sm font-semibold">{{transaction.message}}</h4>
+                                <p class="text-[12px] text-gray-400">{{account.created_at|date:"d M Y"}}</p>
                             </div>
-                            <p class="text-sm font-semibold">-$100,00</p>
+                            {% if transaction.type == 1 %}
+                            <p class="text-sm font-semibold text-green-600">+${{transaction.amount}}</p>
+                            {% else %}
+                                <p class="text-sm font-semibold text-red-600">-${{transaction.amount}}</p>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="flex flex-row items-center justify-between">
-                        <div class="flex flex-row w-full items-center gap-4">
-                            <i class="fa-solid fa-credit-card"></i>
-                            <div class="w-full">
-                                <h4 class="text-sm font-semibold">Nike store</h4>
-                                <p class="text-[12px] text-gray-400">Nike</p>
-                            </div>
-                            <p class="text-sm font-semibold">-$100,00</p>
-                        </div>
-                    </div>
-                    <div class="flex flex-row items-center justify-between">
-                        <div class="flex flex-row w-full items-center gap-4">
-                            <i class="fa-solid fa-credit-card"></i>
-                            <div class="w-full">
-                                <h4 class="text-sm font-semibold">Nike store</h4>
-                                <p class="text-[12px] text-gray-400">Nike</p>
-                            </div>
-                            <p class="text-sm font-semibold">-$100,00</p>
-                        </div>
-                    </div>
-                    <div class="flex flex-row items-center justify-between">
-                        <div class="flex flex-row w-full items-center gap-4">
-                            <i class="fa-solid fa-credit-card"></i>
-                            <div class="w-full">
-                                <h4 class="text-sm font-semibold">Nike store</h4>
-                                <p class="text-[12px] text-gray-400">Nike</p>
-                            </div>
-                            <p class="text-sm font-semibold">-$100,00</p>
-                        </div>
-                    </div>
+                    {% empty %}
+                        <h5 class="text-sm text-gray-400">You have no transactions</h5>
+                    {% endfor %}
                 </div>
             </div>
         </div>
