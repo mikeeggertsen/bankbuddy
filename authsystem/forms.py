@@ -25,9 +25,9 @@ class UserSignInForm(ModelForm):
         }
 
 class CustomerCreationForm(ModelForm): 
-
     def __init__(self, *args, **kwargs):
         super(CustomerCreationForm, self).__init__(*args, **kwargs)
+        self.fields["bank"].empty_label = "Select a bank"
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
@@ -35,7 +35,7 @@ class CustomerCreationForm(ModelForm):
             })
     class Meta:
         model = Customer
-        fields = ["first_name", "last_name", "email", "password", "phone"]
+        fields = ["bank", "first_name", "last_name", "email", "password", "phone"]
         widgets = {
             "first_name": TextInput(attrs={
                 "class": "w-full bg-white border rounded-md shadow",

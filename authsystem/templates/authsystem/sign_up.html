@@ -12,18 +12,22 @@
             <form class="flex flex-col gap-2" method="POST">
                {% csrf_token %}
                <div class="flex flex-col gap-4">
-                   <div class="flex flex-col">
-                       <label class="text-[12px] font-semibold" for="first_name">Firstname</label>
-                       {{form.first_name}}
-                    </div>
-                    <div class="flex flex-col">
-                       <label class="text-[12px] font-semibold" for="last_name">Lastname</label>
-                       {{form.last_name}}
-                    </div>
-                    <div class="flex flex-col">
-                       <label class="text-[12px] font-semibold" for="phone">Phone</label>
-                       {{form.phone}}
-                    </div>
+                  <div class="flex flex-col">
+                     <label class="text-[12px] font-semibold" for="bank">Bank</label>
+                     {{form.bank}}
+                  </div>
+                  <div class="flex flex-col">
+                     <label class="text-[12px] font-semibold" for="first_name">Firstname</label>
+                     {{form.first_name}}
+                  </div>
+                  <div class="flex flex-col">
+                     <label class="text-[12px] font-semibold" for="last_name">Lastname</label>
+                     {{form.last_name}}
+                  </div>
+                  <div class="flex flex-col">
+                     <label class="text-[12px] font-semibold" for="phone">Phone</label>
+                     {{form.phone}}
+                  </div>
                   <div class="flex flex-col">
                      <label class="text-[12px] font-semibold" for="email">Email</label>
                      {{form.email}}

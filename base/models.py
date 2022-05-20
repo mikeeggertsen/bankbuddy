@@ -47,6 +47,7 @@ class Customer(User):
         (GOLD, 'Gold'),
     ]
 
+    bank = models.ForeignKey(Bank, on_delete=models.CASCADE)
     rank = models.PositiveSmallIntegerField(default=BASIC, choices=RANKS)
 
     class Meta:
