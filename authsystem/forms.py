@@ -2,6 +2,14 @@ from django.forms import ModelForm, PasswordInput, TextInput
 from base.models import Customer, User
 
 class UserSignInForm(ModelForm): 
+
+    def __init__(self, *args, **kwargs):
+        super(UserSignInForm, self).__init__(*args, **kwargs)
+
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'border-0 rounded w-full bg-white shadow'
+            })
     class Meta:
         model = User
         fields = ["email", "password"]
@@ -17,6 +25,14 @@ class UserSignInForm(ModelForm):
         }
 
 class CustomerCreationForm(ModelForm): 
+
+    def __init__(self, *args, **kwargs):
+        super(CustomerCreationForm, self).__init__(*args, **kwargs)
+
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'border-0 rounded w-full bg-white shadow'
+            })
     class Meta:
         model = Customer
         fields = ["first_name", "last_name", "email", "password", "phone"]
