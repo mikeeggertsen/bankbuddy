@@ -1,12 +1,12 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
-from base.forms import AccountCreationForm
+from base.forms import AccountCreationForm, TransactionCreationForm
 from django.urls import reverse
 
-from base.models import Account, Customer, Ledger
+from base.models import Account, Bank, Customer, Ledger
 
-
+# DASHBOARD
 @login_required
 def dashboard(request):
     context = {}
@@ -26,20 +26,20 @@ def accounts(request):
 @login_required
 def account_details(request, account_no): 
     context = {}
-    customer = get_object_or_404(Customer, pk=request.user.id)
-    account = get_object_or_404(Account, customer=customer, account_no=account_no)
+    account = get_object_or_404(Account, customer__id=request.user.id, account_no=account_no)
     transactions = Ledger.objects.filter(to_account=account)
     context["account"] = account
     context["transactions"] = transactions
     return render(request, 'base/account_details.html', context)
 
+@login_required
 def create_account(request): 
     context = {}
     form = AccountCreationForm()
     context["form"] = form
     if request.method == "POST":
         form = AccountCreationForm(request.POST)
-        if (form.is_valid()):
+        if form.is_valid():
             customer = get_object_or_404(Customer, pk=request.user.id)
             account = Account(**form.cleaned_data)
             account.customer = customer
@@ -48,9 +48,37 @@ def create_account(request):
 
     return render(request, "base/account_create.html", context)
 
+# TRANSACTIONS
 @login_required
-def transactions(request):
-    return HttpResponse('transactions')
+def create_transaction(request):
+    context = {}
+    if request.method == "POST":
+        form = TransactionCreationForm(request.POST)
+        if form.is_valid():
+            from_account = form.cleaned_data["from_account"]
+            account_no = form.cleaned_data["to_account"]
+            amount = form.cleaned_data["amount"]
+            own_message = form.cleaned_data["own_message"]
+            message = form.cleaned_data["message"]
+            receiverBank = form.cleaned_data["bank"]
+            to_account = Account.objects.filter(account_no=account_no)[:1].get()
+            ownBank = Bank.objects.filter(customer__id=request.user.id)
+            bank = Bank.objects.get(id="DK-bankbuddy-1") #TODO Set bank on customer
+            ledger = Ledger()
+            ledger.make_bank_transaction(
+                to_acc=to_account,
+                from_acc=from_account,
+                transaction_amount=amount,
+                own_message=own_message,
+                message=message,
+                bank=bank
+            )
+        
+    form = TransactionCreationForm()
+    form.fields["from_account"].queryset = Account.objects.filter(customer__id = request.user.id)
+    form.fields["bank"].queryset = Bank.objects.all()
+    context["form"] = form
+    return render(request, "base/transaction_create.html", context)
 
 
 @login_required
