@@ -117,7 +117,6 @@ class Ledger(models.Model):
         (DEBIT, 'Debit'),
     ]
 
-    bank = models.ForeignKey(Bank, on_delete=models.CASCADE, blank=True)
     transaction_id = models.CharField(max_length=50)
     to_account = models.ForeignKey(
         Account, on_delete=models.CASCADE, related_name='to_account')
@@ -137,7 +136,14 @@ class Ledger(models.Model):
         return f'{self.TRANSACTION_TYPES[self.type - 1][1]} - From {self.from_account} -> To {self.to_account} Amount ${self.amount}'
 
     @transaction.atomic
-    def make_bank_transaction(self, to_acc, from_acc, transaction_amount, own_message, message, bank):
+    def make_bank_transaction(
+        self, 
+        to_acc, 
+        from_acc, 
+        transaction_amount, 
+        own_message, 
+        message, 
+    ):
         if from_acc.check_balance() >= transaction_amount:
                 id = uuid.uuid4()
                 credit = Ledger.objects.create(
@@ -147,7 +153,6 @@ class Ledger(models.Model):
                     amount=transaction_amount,
                     type=self.CREDIT,
                     message=message,
-                    bank=bank
                 )
                 debit = Ledger.objects.create(
                     transaction_id=id,
@@ -156,7 +161,6 @@ class Ledger(models.Model):
                     amount=transaction_amount,
                     type=self.DEBIT,
                     message=own_message,
-                    bank=bank
                 )
                 credit.save()
                 debit.save()

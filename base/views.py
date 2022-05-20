@@ -72,10 +72,13 @@ def create_transaction(request):
             amount = form.cleaned_data["amount"]
             own_message = form.cleaned_data["own_message"]
             message = form.cleaned_data["message"]
-            receiverBank = form.cleaned_data["bank"]
-            to_account = Account.objects.filter(account_no=account_no)[:1].get()
-            ownBank = Bank.objects.filter(customer__id=request.user.id)
-            bank = Bank.objects.get(id="DK-bankbuddy-1") #TODO Set bank on customer
+            bank = form.cleaned_data["bank"]
+            to_account = Account.objects.filter(account_no=account_no)
+
+            if bank is not None:
+                to_account = to_account.filter(customer__bank=bank)
+            
+            to_account = to_account[:1].get()
             ledger = Ledger()
             ledger.make_bank_transaction(
                 to_acc=to_account,
@@ -83,12 +86,10 @@ def create_transaction(request):
                 transaction_amount=amount,
                 own_message=own_message,
                 message=message,
-                bank=bank
             )
         
     form = TransactionCreationForm()
     form.fields["from_account"].queryset = Account.objects.filter(customer__id = request.user.id)
-    form.fields["bank"].queryset = Bank.objects.all()
     context["form"] = form
     return render(request, "base/transaction_create.html", context)
 

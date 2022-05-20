@@ -1,5 +1,5 @@
-from django.forms import CharField, ChoiceField, IntegerField, ModelForm, NumberInput, TextInput
-from .models import Account, Ledger
+from django.forms import CharField, ChoiceField, IntegerField, ModelChoiceField, ModelForm, NumberInput, TextInput
+from .models import Account, Bank, Ledger
 
 class AccountCreationForm(ModelForm):
     type = ChoiceField(choices=Account.ACCOUNT_TYPES)
@@ -22,6 +22,7 @@ class AccountCreationForm(ModelForm):
         }
 
 class TransactionCreationForm(ModelForm):
+    bank = ModelChoiceField(queryset=Bank.objects.all())
     to_account = IntegerField()
     own_message = CharField(max_length=255)
 
@@ -38,7 +39,7 @@ class TransactionCreationForm(ModelForm):
 
     class Meta:
         model = Ledger
-        fields = ["from_account", "amount", "message", "bank"]
+        fields = ["from_account", "amount", "message"]
         widgets = {
             "to_account": NumberInput(attrs={
                 "placeholder": "Account no."
