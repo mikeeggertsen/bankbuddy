@@ -1,6 +1,4 @@
 {% extends 'main.html' %} {% block content%}
-<div>
-  <div class="flex flex-col h-full w-full p-6 pb-20">
     <h1 class="text-2xl font-semibold">Accounts</h1>
     <div class="h-full overflow-auto">
       {% for account in accounts%}
@@ -21,6 +19,4 @@
     <a href="/accounts/new" class="bg-primary fixed bottom-20 right-6 flex items-center justify-center rounded-full w-12 h-12 z-10 shadow-2xl">
       <i class="fa-solid fa-plus text-2xl text-white"></i>
     </a>
-  </div>
-  {% endblock content %}
-</div>
+{% endblock content %}

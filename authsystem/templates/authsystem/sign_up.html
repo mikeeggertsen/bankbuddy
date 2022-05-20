@@ -1,12 +1,8 @@
 {%extends 'main.html'%}
 
 {% block content%}
-   <div class="flex flex-row h-full">
-      <div class="h-full w-full lg:w-1/2 bg-white">
-        <div class="p-4">
-            <h3>Bank Buddy</h3>
-        </div>
-        <div class="flex flex-col justify-center px-12 gap-4">
+      <div class="h-full w-full lg:w-1/2">
+        <div class="flex flex-col justify-center gap-4">
             <h1 class="text-3xl font-semibold">Welcome to Bank Buddy</h1>
             <p class="text-sm text-gray-500">Welcome to Bank Buddy! Please enter your details</p>
             <form class="flex flex-col gap-2" method="POST">
@@ -44,5 +40,4 @@
         
       </div>
       <div class="hidden lg:flex lg:flex-col lg:w-1/2"></div>
-   </div>
 {% endblock content %}

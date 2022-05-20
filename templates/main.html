@@ -22,9 +22,14 @@
   </head>
   <body>
     <div class="w-screen h-screen bg-ghostwhite">
-      {%block content%}
-      
-      {%endblock%}
+      <div class="flex flex-col h-full w-full px-6">
+        {% include "header.html" %}
+        <div class="pb-12">
+          {%block content%}
+        
+          {%endblock%}
+        </div>
+      </div>
       {% if user.is_authenticated %}
         {% include 'sidebar.html' %}
         {% include 'bottombar.html' %}
