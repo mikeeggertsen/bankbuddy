@@ -1,5 +1,7 @@
+import os
 from time import time
 import uuid
+import requests
 from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
@@ -86,6 +88,7 @@ class Account(models.Model):
     type = models.PositiveSmallIntegerField(choices=ACCOUNT_TYPES)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         db_table = 'accounts'
 
@@ -137,37 +140,65 @@ class Ledger(models.Model):
 
     @transaction.atomic
     def make_bank_transaction(
-        self, 
-        to_acc, 
-        from_acc, 
-        transaction_amount, 
-        own_message, 
-        message, 
+        self,
+        to_acc,
+        from_acc,
+        transaction_amount,
+        own_message,
+        message,
     ):
         if from_acc.check_balance() >= transaction_amount:
-                id = uuid.uuid4()
-                credit = Ledger.objects.create(
-                    transaction_id=id,
-                    to_account=to_acc,
-                    from_account=from_acc,
-                    amount=transaction_amount,
-                    type=self.CREDIT,
-                    message=message,
-                )
-                debit = Ledger.objects.create(
-                    transaction_id=id,
-                    to_account=from_acc,
-                    from_account=to_acc,
-                    amount=transaction_amount,
-                    type=self.DEBIT,
-                    message=own_message,
-                )
-                credit.save()
-                debit.save()
-                return True
+            id = uuid.uuid4()
+            credit = Ledger.objects.create(
+                transaction_id=id,
+                to_account=to_acc,
+                from_account=from_acc,
+                amount=transaction_amount,
+                type=self.CREDIT,
+                message=message,
+            )
+            debit = Ledger.objects.create(
+                transaction_id=id,
+                to_account=from_acc,
+                from_account=to_acc,
+                amount=transaction_amount,
+                type=self.DEBIT,
+                message=own_message,
+            )
+            credit.save()
+            debit.save()
+            return True
         print(
             f'Failed to make transaction from: {from_acc.account_no} to: {to_acc.account_no} due to insuffiecient funds.')
         return False
+
+    @transaction.atomic
+    def make_external_transfer(
+        self,
+        to_acc,
+        from_acc,
+        transaction_amount,
+        own_message,
+        message,
+        external_bank_id
+    ):
+        request_body = {
+            "senderBankId": Bank.objects.get(external=False).id,
+            "receiverBankId": external_bank_id,
+            "senderAccountNumber": from_acc.account_no,
+            "receiverAccountNumber": to_acc.account_no,
+            "amount": transaction_amount,
+            "message": message
+        }
+        request_headers = {
+            "Token": os.environ['BANK_CONTROLLER_TOKEN'],
+            "Content-Type": "application/json"
+        }
+        request_url = os.environ['BANK_CONTROLLER_ENDPOINT']
+        request = requests.post(
+            request_url, data=request_body, headers=request_headers)
+        data = request.json
+        print(data)
 
 
 class Loan(models.Model):

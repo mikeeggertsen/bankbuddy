@@ -140,9 +140,21 @@ def transfer_request(request):
             }
             return JsonResponse(response, status=405)
 
-        response = {
-            "message": "yo",
-            "status": False
-        }
+        account_number = data['receiverAccountNumber']
+        amount = data['amount']
+        message = data['message']
 
+        try:
+            account = Account.objects.get(account_no=account_number)
+        except:
+            response = {
+                "message": "Could not find account with that number",
+                "status": False
+            }
+            return JsonResponse(response, status=404)
+
+        response = {
+            "message": "Found account - transfer can be made",
+            "status": True
+        }
         return JsonResponse(response, status=200)
