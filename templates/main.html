@@ -24,16 +24,16 @@
     <div class="w-screen h-screen bg-ghostwhite">
       <div class="flex flex-col h-full w-full px-6">
         {% include "header.html" %}
-        <div class="pb-12">
+        <div class="pb-20">
           {%block content%}
         
           {%endblock%}
         </div>
       </div>
-      {% if user.is_authenticated %}
-        {% include 'sidebar.html' %}
-        {% include 'bottombar.html' %}
-      {% endif %}
     </div>
+    {% if user.is_authenticated %}
+      {% include 'sidebar.html' %}
+      {% include 'bottombar.html' %}
+    {% endif %}
   </body>
 </html>
