@@ -1,6 +1,6 @@
-<div class="flex flex-row w-full items-center justify-between py-4">
+<div class="flex flex-row w-full items-center justify-between py-4 lg:hidden px-6">
     <h1 class="text-lg font-semibold text-primary">Bank Buddy</h1>
     {% if user.is_authenticated %}
-        <a href="/signout"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+        <a href="/signout"><i class="fa-solid fa-arrow-right-from-bracket text-gray-400 hover:text-primary duration-300 transition-all"></i></a>
     {% endif %}
 </div>
