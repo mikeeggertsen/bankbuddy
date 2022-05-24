@@ -55,7 +55,7 @@ class TransactionCreationForm(ModelForm):
         cleaned_data = super(TransactionCreationForm, self).clean()
         to_account = cleaned_data["to_account"]
         #TODO ADD EXTERNAL BANK ACCOUNT CHECK
-        if Account.objects.filter(account_no=to_account).none:
+        if Account.objects.filter(account_no=to_account).none():
             raise ValidationError("No account exists with this account no.")
         return to_account
 
