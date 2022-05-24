@@ -1,5 +1,4 @@
 import os
-from time import time
 import uuid
 import requests
 from django.db import models, transaction
