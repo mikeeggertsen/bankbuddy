@@ -38,8 +38,7 @@ def dashboard(request):
 @login_required
 def accounts(request):
     context = {}
-    customer = get_object_or_404(Customer, pk=request.user.id)
-    accounts = Account.objects.filter(customer=customer)
+    accounts = Account.objects.filter(customer__id=request.user.id)
     context['accounts'] = accounts
     return render(request, 'base/account_list.html', context)
 
