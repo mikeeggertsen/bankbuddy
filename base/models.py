@@ -147,30 +147,25 @@ class Ledger(models.Model):
         own_message,
         message,
     ):
-        if from_acc.check_balance() >= transaction_amount:
-            id = uuid.uuid4()
-            credit = Ledger.objects.create(
-                transaction_id=id,
-                to_account=to_acc,
-                from_account=from_acc,
-                amount=transaction_amount,
-                type=self.CREDIT,
-                message=message,
-            )
-            debit = Ledger.objects.create(
-                transaction_id=id,
-                to_account=from_acc,
-                from_account=to_acc,
-                amount=transaction_amount,
-                type=self.DEBIT,
-                message=own_message,
-            )
-            credit.save()
-            debit.save()
-            return True
-        print(
-            f'Failed to make transaction from: {from_acc.account_no} to: {to_acc.account_no} due to insuffiecient funds.')
-        return False
+        id = uuid.uuid4()
+        credit = Ledger.objects.create(
+            transaction_id=id,
+            to_account=to_acc,
+            from_account=from_acc,
+            amount=transaction_amount,
+            type=self.CREDIT,
+            message=message,
+        )
+        debit = Ledger.objects.create(
+            transaction_id=id,
+            to_account=from_acc,
+            from_account=to_acc,
+            amount=transaction_amount,
+            type=self.DEBIT,
+            message=own_message,
+        )
+        credit.save()
+        debit.save()
 
     @transaction.atomic
     def make_external_transfer(

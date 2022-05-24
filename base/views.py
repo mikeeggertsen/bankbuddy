@@ -79,6 +79,7 @@ def create_transaction(request):
     context = {}
     if request.method == "POST":
         form = TransactionCreationForm(request.POST)
+        context["form"] = form
         if form.is_valid():
             from_account = form.cleaned_data["from_account"]
             account_no = form.cleaned_data["to_account"]
@@ -100,6 +101,9 @@ def create_transaction(request):
                 own_message=own_message,
                 message=message,
                 )
+            return HttpResponseRedirect(reverse('base:transfer'))
+        else:
+            return render(request, "base/transaction_create.html", context)
 
 
     form = TransactionCreationForm()
@@ -120,7 +124,9 @@ def profile(request):
             customer.set_password(form.cleaned_data["password"])
             customer.save()
             update_session_auth_hash(request, form.instance)
-        return render(request, 'base/profile_details.html', context)
+            return HttpResponseRedirect(reverse('base:profile'))
+        else: 
+            return render(request, 'base/profile_details.html', context)
 
     customer = Customer.objects.get(pk=request.user.id)
     context["form"] = ProfileForm(instance=customer)

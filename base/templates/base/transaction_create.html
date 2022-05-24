@@ -7,11 +7,17 @@
         <div class="flex flex-col">
             <label class="text-[12px] font-bold"  for="from_account">From account</label>
             {{form.from_account}}
+            {% for error in form.from_account.errors  %}
+                <p class="text-red-500 text-[12px]">{{error}}</p>
+            {% endfor %}
         </div>
         <div class="flex flex-col gap-2">
             <div>
                 <label class="text-[12px] font-bold" for="to_account">To account</label>
                 {{form.to_account}}
+                {% for error in form.to_account.errors  %}
+                <p class="text-red-500 text-[12px]">{{error}}</p>
+            {% endfor %}
             </div>
             <div class="flex flex-row items-center gap-2">
                 <input class="w-3 h-3 rounded" type="checkbox" id="external" >

@@ -22,21 +22,9 @@ class AccountCreationForm(ModelForm):
         }
 
 class TransactionCreationForm(ModelForm):
-    bank = ModelChoiceField(queryset=Bank.objects.all())
+    bank = ModelChoiceField(queryset=Bank.objects.all(), required=False)
     to_account = IntegerField()
     own_message = CharField(max_length=255)
-
-    def __init__(self, *args, **kwargs):
-        super(TransactionCreationForm, self).__init__(*args, **kwargs)
-        self.fields['own_message'].widget.attrs['placeholder'] = 'Message to your account'
-        self.fields["from_account"].empty_label = "Select an account"
-        self.fields["bank"].empty_label = "Select a bank"
-
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({
-                'class': 'border-0 rounded w-full bg-white shadow'
-            })
-
     class Meta:
         model = Ledger
         fields = ["from_account", "amount", "message"]
@@ -52,6 +40,33 @@ class TransactionCreationForm(ModelForm):
             }),
         }
 
+    def __init__(self, *args, **kwargs):
+        super(TransactionCreationForm, self).__init__(*args, **kwargs)
+        self.fields['own_message'].widget.attrs['placeholder'] = 'Message to your account'
+        self.fields["from_account"].empty_label = "Select an account"
+        self.fields["bank"].empty_label = "Select a bank"
+
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'border-0 rounded w-full bg-white shadow'
+            })
+
+    def clean_to_account(self):
+        cleaned_data = super(TransactionCreationForm, self).clean()
+        to_account = cleaned_data["to_account"]
+        #TODO ADD EXTERNAL BANK ACCOUNT CHECK
+        if Account.objects.filter(account_no=to_account).none:
+            raise ValidationError("No account exists with this account no.")
+        return to_account
+
+    def clean(self):
+        cleaned_data = super(TransactionCreationForm, self).clean()
+        from_acc = cleaned_data["from_account"]
+        amount = cleaned_data["amount"]
+        balance = from_acc.check_balance()
+        if balance < amount:
+            raise ValidationError({"from_account": "Account has inefficient funds"})
+        return cleaned_data
 
 class ProfileForm(ModelForm):
     password = CharField(widget=PasswordInput,required=False)
