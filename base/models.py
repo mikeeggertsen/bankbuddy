@@ -92,14 +92,18 @@ class Account(models.Model):
     class Meta:
         db_table = 'accounts'
 
+    def __init__(self, *args, **kwargs):
+        super(Account, self).__init__(*args, **kwargs)
+        self.balance = self.check_balance()
+
+    def __str__(self):
+        return f'{self.name} - ${self.balance}'
+
     def save(self, *args, **kwargs):
         if self.account_no is None:
             numOfAccounts = Account.objects.all().count()
             self.account_no = settings.START_ACCOUNT_NO + numOfAccounts + 1
         super(Account, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return f'{self.name} - ${self.balance}'
 
     def check_balance(self):
         transactions = Ledger.objects.filter(to_account=self)
