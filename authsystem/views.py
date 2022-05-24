@@ -45,14 +45,14 @@ def sign_up(request):
 
     if request.method == "POST":
         form = CustomerCreationForm(request.POST)
+        context["form"] = form
         if form.is_valid():
             try:
                 Customer.objects.create_user(**form.cleaned_data)
                 return HttpResponseRedirect(reverse('authsystem:sign_in'))
-            except ValueError:
+            except Exception:
                 context["error"] = "Unable to create customer account. Please try again"
-        else:
-            context["error"] = "Unable to create customer account. Please try again"
+        return render(request, "authsystem/sign_up.html", context)
     
     form = CustomerCreationForm()
     form["bank"].queryset = Bank.objects.all()
