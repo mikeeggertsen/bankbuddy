@@ -17,6 +17,9 @@
                      {{form.password}}
                   </div>
                </div>
+               {% if error %} 
+                  <p class="text-red-500 text-[12px]">{{error}}</p>
+               {% endif %}
                <p class="text-sm text-primary">Forgot password</p>
                <button type="submit" class="w-full bg-primary text-white py-2 rounded">Sign in</button>
             </form>

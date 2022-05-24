@@ -1,26 +1,17 @@
-from django.forms import ModelForm, PasswordInput, TextInput
+from django.forms import Form, CharField, EmailField, ModelForm, PasswordInput, TextInput, ValidationError
 from base.models import Customer, User
 
-class UserSignInForm(ModelForm): 
+class UserSignInForm(Form): 
+    email = EmailField(widget=TextInput(attrs={'placeholder': 'Email'}))
+    password = CharField(widget=PasswordInput(attrs={"placeholder": "Password"}))
 
     def __init__(self, *args, **kwargs):
-        super(UserSignInForm, self).__init__(*args, **kwargs)
+            super(UserSignInForm, self).__init__(*args, **kwargs)
 
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({
-                'class': 'border-0 rounded w-full bg-white shadow'
-            })
-    class Meta:
-        model = User
-        fields = ["email", "password"]
-        widgets = {
-            "email": TextInput(attrs={
-                "placeholder": "Enter your email",
-            }),
-            "password": PasswordInput(attrs={
-                "placeholder": "Password",
-            })
-        }
+            for field in self.fields:
+                self.fields[field].widget.attrs.update({
+                    'class': 'border-0 rounded w-full bg-white shadow'
+                })
 
 class CustomerCreationForm(ModelForm): 
     def __init__(self, *args, **kwargs):

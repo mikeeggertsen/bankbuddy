@@ -5,7 +5,6 @@ from django.contrib.auth import authenticate, login, logout
 from authsystem.forms import CustomerCreationForm, UserSignInForm
 from base.models import Bank, Customer
 
-
 def sign_in(request):
     context = {}
 
@@ -13,16 +12,23 @@ def sign_in(request):
         return redirect(reverse("base:dashboard"))
 
     if request.method == "POST":
-        email = request.POST["email"]
-        password = request.POST["password"]
-        user = authenticate(request, email=email, password=password)
-        if user:
-            login(request, user)
-            return HttpResponseRedirect(reverse("base:dashboard"))
-        else:
-            context["error"] = "Bad username or password"
-    
-    context["form"] = UserSignInForm()
+        form = UserSignInForm(request.POST)
+        context["form"] = form
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password"]
+            print(email, password)
+            user = authenticate(request, email=email, password=password)
+            print(user)
+            if user:
+                login(request, user)
+                return HttpResponseRedirect(reverse("base:dashboard"))
+            else:
+                context["error"] = "Email or password is incorrect"
+                return render(request, "authsystem/sign_in.html", context)
+
+    form = UserSignInForm()
+    context["form"] = form
     return render(request, "authsystem/sign_in.html", context)
 
 
