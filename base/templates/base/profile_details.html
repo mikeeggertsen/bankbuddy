@@ -1,0 +1,58 @@
+{% extends 'main.html' %}
+
+{% block content %}
+   <div class="mb-4">
+    <h1 class="text-2xl font-semibold">Profile</h1>
+    <p class="text-sm text-gray-400">Please enter your current details</p>
+   </div>
+    <form class="flex flex-col gap-4" method="POST">
+        {% csrf_token %}
+        <div class="grid grid-flow-row grid-cols-2 gap-4">
+            <div class="flex flex-col">
+                <label class="text-[12px] font-bold" for="{{ form.first_name.id_for_label }}">Firstname</label>
+                {{form.first_name}}
+            </div>
+            <div class="flex flex-col">
+                <label class="text-[12px] font-bold" for="{{ form.last_name.id_for_label }}">Lastname</label>
+                {{form.last_name}}
+            </div>
+        </div>
+        <div class="flex flex-col">
+            <label class="text-[12px] font-bold" for="{{ form.phone.id_for_label }}">Phone no.</label>
+            {{form.phone}}
+            {% for error in form.phone.errors %}
+                <p class="text-red-500 text-[12px]">{{error}}</p>
+            {% endfor %}
+        </div>
+        <div class="flex flex-col">
+            <label class="text-[12px] font-bold" for="{{ form.password.id_for_label }}">Password</label>
+            {{form.password}}
+        </div>
+        <div class="flex flex-col">
+            <label class="text-[12px] font-bold" for="{{ form.confirm_password.id_for_label }}">Confirm password</label>
+            {{form.confirm_password}}
+            {% for error in form.password.errors %}
+                <p class="text-red-500 text-[12px]">{{error}}</p>
+            {% endfor %}
+        </div>
+        <div class="flex flex-col">
+            <label class="text-[12px] font-bold" for="{{ form.email.id_for_label }}">Email</label>
+            {{form.email.value}}
+            {{form.email}}
+        </div>
+        <div class="flex flex-col">
+            <label class="text-[12px] font-bold" for="{{ form.rank.id_for_label }}">Rank</label>
+            {{form.rank}}
+            {% if form.rank.value == 1 %}
+                <p>Basic</p>
+            {% elif form.rank.value == 2 %}
+                <p>Silver</p>
+            {% elif form.rank.value == 3 %}
+                <p>Gold</p>
+            {% else %}
+                <p>Undefined</p>
+            {% endif %}
+        </div>
+        <button type="submit" class="w-full bg-primary text-white py-2 rounded">Save</button>
+    </form>
+{% endblock %}

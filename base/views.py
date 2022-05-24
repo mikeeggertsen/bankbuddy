@@ -1,15 +1,13 @@
-from email import message
 import json
 import os
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from pkg_resources import require
-from base.forms import AccountCreationForm, TransactionCreationForm
+from base.forms import AccountCreationForm, ProfileForm, TransactionCreationForm
 from django.urls import reverse
-
-from base.models import Account, Bank, Customer, Ledger
+from django.contrib.auth import update_session_auth_hash
+from base.models import Account, Customer, Ledger
 
 # DASHBOARD
 
@@ -101,7 +99,8 @@ def create_transaction(request):
                 transaction_amount=amount,
                 own_message=own_message,
                 message=message,
-            )
+                )
+
 
     form = TransactionCreationForm()
     form.fields["from_account"].queryset = Account.objects.filter(
@@ -112,7 +111,20 @@ def create_transaction(request):
 
 @login_required
 def profile(request):
-    return HttpResponse('profile')
+    context = {}
+    if request.method == "POST":
+        form = ProfileForm(request.POST, instance=request.user)
+        context["form"] = form
+        if form.is_valid():
+            customer = form.save()
+            customer.set_password(form.cleaned_data["password"])
+            customer.save()
+            update_session_auth_hash(request, form.instance)
+        return render(request, 'base/profile_details.html', context)
+
+    customer = Customer.objects.get(pk=request.user.id)
+    context["form"] = ProfileForm(instance=customer)
+    return render(request, 'base/profile_details.html', context)
 
 
 @login_required
