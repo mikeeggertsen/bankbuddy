@@ -35,7 +35,10 @@
                 <i class="fa-solid fa-credit-card"></i>
                 <div class="w-full">
                     <h4 class="text-sm font-semibold">{{transaction.message}}</h4>
-                    <p class="text-[12px] text-gray-400">{{account.created_at|date:"d M Y"}}</p>
+                    <div class="flex flex-row gap-4">
+                        <p class="text-[12px] text-gray-400">{{transaction.account.name}}</p>
+                        <p class="text-[12px] text-gray-400">{{transaction.created_at|date:"d M Y"}}</p>
+                    </div>
                 </div>
                 {% if transaction.type == 1 %}
                 <p class="text-sm font-semibold text-green-600">+${{transaction.amount}}</p>

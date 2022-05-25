@@ -5,9 +5,9 @@
     <form class="flex flex-col gap-4 mt-2" method="POST">
         {% csrf_token %}
         <div class="flex flex-col">
-            <label class="text-[12px] font-bold"  for="from_account">From account</label>
-            {{form.from_account}}
-            {% for error in form.from_account.errors  %}
+            <label class="text-[12px] font-bold"  for="account">From account</label>
+            {{form.account}}
+            {% for error in form.account.errors  %}
                 <p class="text-red-500 text-[12px]">{{error}}</p>
             {% endfor %}
         </div>
