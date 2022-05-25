@@ -9,7 +9,7 @@ class VerificationCode(models.Model):
     user_id = models.IntegerField()
     code = models.CharField(unique=True, max_length=5)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(default=timezone.now() + timedelta(minutes=1))
+    expires_at = models.DateTimeField(default=timezone.now() + timedelta(minutes=15))
 
     class Meta:
         db_table = 'verification_codes'
