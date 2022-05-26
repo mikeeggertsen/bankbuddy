@@ -106,7 +106,7 @@ class Account(models.Model):
 
     @property
     def balance(self):
-       return self.transactions.aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
+        return self.transactions.aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
 
 
 class Ledger(models.Model):
@@ -118,7 +118,7 @@ class Ledger(models.Model):
     ]
 
     transaction_id = models.CharField(max_length=50)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    account = models.CharField(max_length=50)
     amount = models.DecimalField(decimal_places=2, max_digits=12)
     type = models.PositiveSmallIntegerField(choices=TRANSACTION_TYPES)
     message = models.CharField(max_length=100)
@@ -151,7 +151,7 @@ class Ledger(models.Model):
                 message=own_message,
             ).save()
         return id
-    
+
     @classmethod
     def make_external_transfer(cls, credit_account, debit_account, amount, message, external_bank_id):
         with transaction.atomic():
