@@ -41,9 +41,9 @@
                     </div>
                 </div>
                 {% if transaction.type == 1 %}
-                <p class="text-sm font-semibold text-green-600">+${{transaction.amount}}</p>
+                <p class="text-sm font-semibold text-green-600">${{transaction.amount}}</p>
                 {% else %}
-                    <p class="text-sm font-semibold text-red-600">-${{transaction.amount}}</p>
+                    <p class="text-sm font-semibold text-red-600">${{transaction.amount}}</p>
                 {% endif %}
             </div>
         </div>
