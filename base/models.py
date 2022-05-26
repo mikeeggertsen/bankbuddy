@@ -1,4 +1,5 @@
 from decimal import Decimal
+from logging import exception
 import os
 import uuid
 import requests
@@ -102,7 +103,7 @@ class Account(models.Model):
 
     @property
     def transactions(self):
-        return Ledger.objects.filter(account=self)
+        return Ledger.objects.filter(account=self.account_no)
 
     @property
     def balance(self):
@@ -153,25 +154,52 @@ class Ledger(models.Model):
         return id
 
     @classmethod
-    def make_external_transfer(cls, credit_account, debit_account, amount, message, external_bank_id):
+    def make_external_transfer(cls, credit_account, debit_account, amount, own_message, message, external_bank_id):
         with transaction.atomic():
+            id = uuid.uuid4()
             request_body = {
+                "id": str(id),
                 "senderBankId": Bank.objects.get(external=False).id,
                 "receiverBankId": external_bank_id,
-                "senderAccountNumber": debit_account.account_no,
-                "receiverAccountNumber": credit_account.account_no,
-                "amount": amount,
+                "senderAccountNumber": debit_account,
+                "receiverAccountNumber": credit_account,
+                "amount": str(amount),
                 "message": message
             }
+
+            print("OUTGOING REQEUST BODY")
+            print(request_body)
+
             request_headers = {
                 "Token": os.environ['BANK_CONTROLLER_TOKEN'],
                 "Content-Type": "application/json"
             }
             request_url = os.environ['BANK_CONTROLLER_ENDPOINT']
-            request = requests.post(
-                request_url, data=request_body, headers=request_headers)
-            data = request.json
-            print(data)
+            response = requests.post(
+                request_url, json=request_body, headers=request_headers)
+            if response.status_code == 200:
+                print(f"Got good response!! {response.json()}")
+                Ledger.objects.create(
+                    transaction_id=id,
+                    account=debit_account,
+                    amount=-amount,
+                    type=cls.DEBIT,
+                    message=own_message,
+                )
+            else:
+                print(f"External transfer failed!! {response.json()}")
+
+    @classmethod
+    def receive_external_transfer(cls, credit_account, amount, message, transaction_id):
+        print("received external transfer!!")
+        with transaction.atomic():
+            Ledger.objects.create(
+                transaction_id=transaction_id,
+                account=credit_account,
+                amount=amount,
+                message=message,
+                type=cls.CREDIT
+            )
 
 
 class Loan(models.Model):
