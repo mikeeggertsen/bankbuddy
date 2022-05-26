@@ -27,7 +27,7 @@ class TransactionCreationForm(ModelForm):
     own_message = CharField(max_length=255)
     class Meta:
         model = Ledger
-        fields = ["from_account", "amount", "message"]
+        fields = ["account", "amount", "message"]
         widgets = {
             "to_account": NumberInput(attrs={
                 "placeholder": "Account no."
@@ -43,7 +43,7 @@ class TransactionCreationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(TransactionCreationForm, self).__init__(*args, **kwargs)
         self.fields['own_message'].widget.attrs['placeholder'] = 'Message to your account'
-        self.fields["from_account"].empty_label = "Select an account"
+        self.fields["account"].empty_label = "Select an account"
         self.fields["bank"].empty_label = "Select a bank"
 
         for field in self.fields:
@@ -55,17 +55,16 @@ class TransactionCreationForm(ModelForm):
         cleaned_data = super(TransactionCreationForm, self).clean()
         to_account = cleaned_data["to_account"]
         #TODO ADD EXTERNAL BANK ACCOUNT CHECK
-        if Account.objects.filter(account_no=to_account).none():
+        if not Account.objects.filter(account_no=to_account).exists():
             raise ValidationError("No account exists with this account no.")
         return to_account
 
     def clean(self):
         cleaned_data = super(TransactionCreationForm, self).clean()
-        from_acc = cleaned_data["from_account"]
+        account = cleaned_data["account"]
         amount = cleaned_data["amount"]
-        balance = from_acc.check_balance()
-        if balance < amount:
-            raise ValidationError({"from_account": "Account has inefficient funds"})
+        if account.balance < amount:
+            raise ValidationError({"account": "Account has inefficient funds"})
         return cleaned_data
 
 class ProfileForm(ModelForm):

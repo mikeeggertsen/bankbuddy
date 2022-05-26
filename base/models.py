@@ -1,3 +1,4 @@
+from decimal import Decimal
 import os
 import uuid
 import requests
@@ -57,10 +58,10 @@ class Customer(User):
 
 class Employee(User):
     SUPPORT = 1
-    MODERATER = 2
+    MANAGER = 2
     DEPARTMENTS = [
         (SUPPORT, 'Support'),
-        (MODERATER, 'Moderator'),
+        (MANAGER, 'Manager'),
     ]
 
     department = models.PositiveSmallIntegerField(choices=DEPARTMENTS)
@@ -83,17 +84,12 @@ class Account(models.Model):
         Customer, on_delete=models.CASCADE, related_name='customer')
     name = models.CharField(max_length=255)
     account_no = models.IntegerField(unique=True)
-    balance = models.DecimalField(decimal_places=2, max_digits=12, default=0)
     type = models.PositiveSmallIntegerField(choices=ACCOUNT_TYPES)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'accounts'
-
-    def __init__(self, *args, **kwargs):
-        super(Account, self).__init__(*args, **kwargs)
-        self.balance = self.check_balance()
 
     def __str__(self):
         return f'{self.name} - ${self.balance}'
@@ -104,15 +100,13 @@ class Account(models.Model):
             self.account_no = settings.START_ACCOUNT_NO + numOfAccounts + 1
         super(Account, self).save(*args, **kwargs)
 
-    def check_balance(self):
-        transactions = Ledger.objects.filter(to_account=self)
-        balance = 0
-        for transaction in transactions:
-            if transaction.type == 1:
-                balance += transaction.amount
-            else:
-                balance -= transaction.amount
-        return balance
+    @property
+    def transactions(self):
+        return Ledger.objects.filter(account=self)
+
+    @property
+    def balance(self):
+       return self.transactions.aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
 
 
 class Ledger(models.Model):
@@ -124,10 +118,7 @@ class Ledger(models.Model):
     ]
 
     transaction_id = models.CharField(max_length=50)
-    to_account = models.ForeignKey(
-        Account, on_delete=models.CASCADE, related_name='to_account')
-    from_account = models.ForeignKey(
-        Account, on_delete=models.CASCADE, related_name='from_account')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
     amount = models.DecimalField(decimal_places=2, max_digits=12)
     type = models.PositiveSmallIntegerField(choices=TRANSACTION_TYPES)
     message = models.CharField(max_length=100)
@@ -139,64 +130,48 @@ class Ledger(models.Model):
         db_table = 'ledger'
 
     def __str__(self):
-        return f'{self.TRANSACTION_TYPES[self.type - 1][1]} - From {self.from_account} -> To {self.to_account} Amount ${self.amount}'
+        return f'{self.TRANSACTION_TYPES[self.type - 1][1]} - Account {self.account} - Amount ${self.amount}'
 
-    @transaction.atomic
-    def make_bank_transaction(
-        self,
-        to_acc,
-        from_acc,
-        transaction_amount,
-        own_message,
-        message,
-    ):
+    @classmethod
+    def make_bank_transaction(cls, credit_account, debit_account, amount, own_message, message):
         id = uuid.uuid4()
-        credit = Ledger.objects.create(
-            transaction_id=id,
-            to_account=to_acc,
-            from_account=from_acc,
-            amount=transaction_amount,
-            type=self.CREDIT,
-            message=message,
-        )
-        debit = Ledger.objects.create(
-            transaction_id=id,
-            to_account=from_acc,
-            from_account=to_acc,
-            amount=transaction_amount,
-            type=self.DEBIT,
-            message=own_message,
-        )
-        credit.save()
-        debit.save()
-
-    @transaction.atomic
-    def make_external_transfer(
-        self,
-        to_acc,
-        from_acc,
-        transaction_amount,
-        own_message,
-        message,
-        external_bank_id
-    ):
-        request_body = {
-            "senderBankId": Bank.objects.get(external=False).id,
-            "receiverBankId": external_bank_id,
-            "senderAccountNumber": from_acc.account_no,
-            "receiverAccountNumber": to_acc.account_no,
-            "amount": transaction_amount,
-            "message": message
-        }
-        request_headers = {
-            "Token": os.environ['BANK_CONTROLLER_TOKEN'],
-            "Content-Type": "application/json"
-        }
-        request_url = os.environ['BANK_CONTROLLER_ENDPOINT']
-        request = requests.post(
-            request_url, data=request_body, headers=request_headers)
-        data = request.json
-        print(data)
+        with transaction.atomic():
+            Ledger.objects.create(
+                transaction_id=id,
+                account=credit_account,
+                amount=amount,
+                type=cls.CREDIT,
+                message=message,
+            ).save()
+            Ledger.objects.create(
+                transaction_id=id,
+                account=debit_account,
+                amount=-amount,
+                type=cls.DEBIT,
+                message=own_message,
+            ).save()
+        return id
+    
+    @classmethod
+    def make_external_transfer(cls, credit_account, debit_account, amount, message, external_bank_id):
+        with transaction.atomic():
+            request_body = {
+                "senderBankId": Bank.objects.get(external=False).id,
+                "receiverBankId": external_bank_id,
+                "senderAccountNumber": debit_account.account_no,
+                "receiverAccountNumber": credit_account.account_no,
+                "amount": amount,
+                "message": message
+            }
+            request_headers = {
+                "Token": os.environ['BANK_CONTROLLER_TOKEN'],
+                "Content-Type": "application/json"
+            }
+            request_url = os.environ['BANK_CONTROLLER_ENDPOINT']
+            request = requests.post(
+                request_url, data=request_body, headers=request_headers)
+            data = request.json
+            print(data)
 
 
 class Loan(models.Model):

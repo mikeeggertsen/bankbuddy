@@ -19,8 +19,7 @@ def dashboard(request):
     try:
         account = Account.objects.filter(
             customer__id=request.user.id)[:1].get()
-        transactions = Ledger.objects.filter(
-            to_account__customer__id=request.user.id)
+        transactions = Ledger.objects.filter(account__customer__id=request.user.id)
         if transaction_filter == "credit":
             transactions = transactions.filter(type=1)
         elif transaction_filter == "debit":
@@ -48,7 +47,7 @@ def account_details(request, account_no):
     context = {}
     account = get_object_or_404(
         Account, customer__id=request.user.id, account_no=account_no)
-    transactions = Ledger.objects.filter(to_account=account)
+    transactions = Ledger.objects.filter(account=account)
     context["account"] = account
     context["transactions"] = transactions
     return render(request, 'base/account_details.html', context)
@@ -71,8 +70,6 @@ def create_account(request):
     return render(request, "base/account_create.html", context)
 
 # TRANSACTIONS
-
-
 @login_required
 def create_transaction(request):
     context = {}
@@ -80,7 +77,7 @@ def create_transaction(request):
         form = TransactionCreationForm(request.POST)
         context["form"] = form
         if form.is_valid():
-            from_account = form.cleaned_data["from_account"]
+            account = form.cleaned_data["account"]
             account_no = form.cleaned_data["to_account"]
             amount = form.cleaned_data["amount"]
             own_message = form.cleaned_data["own_message"]
@@ -92,21 +89,20 @@ def create_transaction(request):
                 to_account = to_account.filter(customer__bank=bank)
 
             to_account = to_account[:1].get()
-            ledger = Ledger()
-            ledger.make_bank_transaction(
-                to_acc=to_account,
-                from_acc=from_account,
-                transaction_amount=amount,
+            Ledger.make_bank_transaction(
+                credit_account=to_account,
+                debit_account=account,
+                amount=amount,
                 own_message=own_message,
                 message=message,
-                )
+            )
             return HttpResponseRedirect(reverse('base:transfer'))
         else:
             return render(request, "base/transaction_create.html", context)
 
 
     form = TransactionCreationForm()
-    form.fields["from_account"].queryset = Account.objects.filter(
+    form.fields["account"].queryset = Account.objects.filter(
         customer__id=request.user.id)
     context["form"] = form
     return render(request, "base/transaction_create.html", context)
