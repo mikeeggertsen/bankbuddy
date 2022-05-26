@@ -90,9 +90,6 @@ def create_transaction(request):
             to_account = Account.objects.filter(account_no=account_no)
             account = Account.objects.get(account_no=from_account_no)
 
-            print(request.user.id)
-            print(account.customer.id)
-
             if account.customer.id != request.user.id:
                 print("Not your account!!")  # TODO show error to user
                 return HttpResponseRedirect(reverse('base:transfer'))
@@ -180,13 +177,6 @@ def transfer_request(request):
         amount = data['amount']
         message = data['message']
 
-        # print(transaction_id)
-        # print(bank_id)
-        # print(sender_bank_account)
-        # print(account_number)
-        # print(amount)
-        # print(message)
-
         try:
             Account.objects.get(account_no=account_number)
         except:
@@ -203,8 +193,7 @@ def transfer_request(request):
                 message=f"{bank_id}#{sender_bank_account}: {message}",
                 transaction_id=transaction_id
             )
-        except exception as e:
-            print(e)
+        except:
             response = {
                 "message": "Could not receive the transfer",
                 "status": False

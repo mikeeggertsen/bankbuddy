@@ -167,9 +167,6 @@ class Ledger(models.Model):
                 "message": message
             }
 
-            print("OUTGOING REQEUST BODY")
-            print(request_body)
-
             request_headers = {
                 "Token": os.environ['BANK_CONTROLLER_TOKEN'],
                 "Content-Type": "application/json"
@@ -178,7 +175,6 @@ class Ledger(models.Model):
             response = requests.post(
                 request_url, json=request_body, headers=request_headers)
             if response.status_code == 200:
-                print(f"Got good response!! {response.json()}")
                 Ledger.objects.create(
                     transaction_id=id,
                     account=debit_account,
@@ -191,7 +187,6 @@ class Ledger(models.Model):
 
     @classmethod
     def receive_external_transfer(cls, credit_account, amount, message, transaction_id):
-        print("received external transfer!!")
         with transaction.atomic():
             Ledger.objects.create(
                 transaction_id=transaction_id,
