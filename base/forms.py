@@ -1,5 +1,6 @@
+from calendar import c
 from django.forms import CharField, ChoiceField, IntegerField, ModelChoiceField, ModelForm, NumberInput, PasswordInput, TextInput, ValidationError
-from .models import Account, Bank, Customer, Ledger, User
+from .models import Account, AccountLedger, Bank, Customer, Loan, User
 
 class AccountCreationForm(ModelForm):
     type = ChoiceField(choices=Account.ACCOUNT_TYPES)
@@ -9,7 +10,7 @@ class AccountCreationForm(ModelForm):
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-                'class': 'border-0 rounded w-full bg-white shadow'
+                'class': 'bb-input'
             })
     class Meta:
         model = Account
@@ -23,15 +24,12 @@ class AccountCreationForm(ModelForm):
 
 class TransactionCreationForm(ModelForm):
     bank = ModelChoiceField(queryset=Bank.objects.all(), required=False)
-    to_account = IntegerField()
+    to_account = CharField()
     own_message = CharField(max_length=255)
     class Meta:
-        model = Ledger
+        model = AccountLedger
         fields = ["account", "amount", "message"]
         widgets = {
-            "to_account": NumberInput(attrs={
-                "placeholder": "Account no."
-            }),
             "amount": NumberInput(attrs={
                 "placeholder": "Amount"
             }),
@@ -43,12 +41,13 @@ class TransactionCreationForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(TransactionCreationForm, self).__init__(*args, **kwargs)
         self.fields['own_message'].widget.attrs['placeholder'] = 'Message to your account'
+        self.fields["to_account"].widget.attrs['placeholder'] = "Account no."
         self.fields["account"].empty_label = "Select an account"
         self.fields["bank"].empty_label = "Select a bank"
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-                'class': 'border-0 rounded w-full bg-white shadow'
+               'class': 'bb-input',
             })
 
     def clean_to_account(self):
@@ -73,20 +72,20 @@ class ProfileForm(ModelForm):
     class Meta: 
         model = Customer
         fields = ["first_name", "last_name", "phone", "email", "rank"]
-        widgets = {
-            "email": TextInput(attrs={
-                "hidden": True
-            }),
-            "rank": TextInput(attrs={
-                "hidden": True
-            })
-        }
+     
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)
-
+        self.fields["first_name"].widget.attrs['placeholder'] = "Firstname"
+        self.fields["last_name"].widget.attrs['placeholder'] = "Lastname"
+        self.fields["phone"].widget.attrs['placeholder'] = "Phone no."
+        self.fields["email"].widget.attrs['placeholder'] = "Email"
+        self.fields["rank"].widget.attrs['placeholder'] = "Rank"
+        self.fields["password"].widget.attrs['placeholder'] = "Password"
+        self.fields["confirm_password"].widget.attrs['placeholder'] = "Confirm password"
+        
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-                'class': 'border-0 rounded w-full bg-white shadow'
+                'class': 'bb-input',
             })
 
     def clean_email(self):
@@ -110,3 +109,22 @@ class ProfileForm(ModelForm):
         if password != confirm_password:
             raise ValidationError({"password": "Password must match"}) 
         return cleaned_data
+
+
+class LoanForm(ModelForm):
+    accounts = ModelChoiceField(queryset=None, required=True)
+    class Meta:
+        model = Loan
+        fields = ["amount", "name"]
+
+    def __init__(self, customer_id, *args, **kwargs):
+        super(LoanForm, self).__init__(*args, **kwargs)
+        self.fields["accounts"].empty_label = "Select an account"
+        self.fields["amount"].widget.attrs['placeholder'] = "Amount"
+        self.fields["name"].widget.attrs['placeholder'] = "Name of loan"
+        self.fields["accounts"].queryset = Account.objects.filter(customer__id=customer_id)
+
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+               'class': 'bb-input'
+            })
