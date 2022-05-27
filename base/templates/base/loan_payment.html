@@ -1,0 +1,33 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <h1 class="text-2xl font-semibold">Payment on loan</h1>
+    <form class="flex flex-col gap-4 mt-2" method="POST">
+        {% csrf_token %}
+        <div class="flex flex-col">
+            <label class="text-[12px] font-bold"  for="account">From account</label>
+            {{form.account}}
+            {% for error in form.account.errors  %}
+                <p class="text-red-500 text-[12px]">{{error}}</p>
+            {% endfor %}
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="text-[12px] font-bold" for="to_account">Loan</label>
+            {{form.to_account}}
+            {% for error in form.to_account.errors  %}
+                <p class="text-red-500 text-[12px]">{{error}}</p>
+            {% endfor %}
+        </div>
+        <div class="flex flex-col">
+            <label class="text-[12px] font-bold" for="amount">Amount</label>
+            {{form.amount}}
+            {% for error in form.amount.errors  %}
+                <p class="text-red-500 text-[12px]">{{error}}</p>
+            {% endfor %}
+        </div>
+        {% if error  %}
+            <p class="text-red-500 text-[12px]">{{error}}</p>
+        {% endif %}
+        <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg">Transfer money</button>
+    </form>
+{% endblock %}
