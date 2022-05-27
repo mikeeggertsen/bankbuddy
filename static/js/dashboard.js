@@ -1,12 +1,11 @@
 $(document).ready(() => {
-  $('.transaction-option-active').removeClass('transaction-option-active');
   const urlSearchParams = new URLSearchParams(window.location.search);
   const q = urlSearchParams.get('q');
   if (q === 'credit') {
-    $('#credit-transactions').addClass('transaction-option-active');
+    $('#credit-transactions').addClass('active');
   } else if (q === 'debit') {
-    $('#debit-transactions').addClass('transaction-option-active');
+    $('#debit-transactions').addClass('active');
   } else {
-    $('#all-transactions').addClass('transaction-option-active');
+    $('#all-transactions').addClass('active');
   }
 });

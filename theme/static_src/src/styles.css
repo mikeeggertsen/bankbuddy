@@ -9,7 +9,7 @@
   .menu-item {
     @apply text-blackTransparent;
   }
-  .transaction-option-active {
+  .transaction-option.active {
     @apply before:absolute before:-bottom-px before:bg-black before:w-full before:h-px;
   }
 }
