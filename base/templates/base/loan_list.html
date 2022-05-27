@@ -29,10 +29,16 @@
             </div>
           </a>
         {%empty%}
-          <p class="text-sm text-gray-400">You have no loans</p>
+        {% if customer.rank <= 1 %}
+            <p class="text-sm text-gray-400">You must be a Silver or Gold customer to take loans</p>
+        {%else%}
+            <p class="text-sm text-gray-400">You have no loans</p>
+        {% endif %}
         {% endfor %}
-        <a href="/loans/apply" class="bg-primary absolute bottom-0 right-0 flex items-center justify-center rounded-full w-16 h-16 z-10 shadow-2xl">
-            <i class="fa-solid fa-file-signature pl-2 text-3xl text-white"></i>
-        </a>
+        {% if customer.rank > 1 %}
+            <a href="/loans/apply" class="bg-primary absolute bottom-0 right-0 flex items-center justify-center rounded-full w-16 h-16 z-10 shadow-2xl">
+                <i class="fa-solid fa-file-signature pl-2 text-3xl text-white"></i>
+            </a>
+        {% endif %}
     </div>
 {% endblock %}

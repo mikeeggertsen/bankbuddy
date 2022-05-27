@@ -2,7 +2,7 @@ import json
 import os
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from base.forms import AccountCreationForm, LoanForm, ProfileForm, TransactionCreationForm
 from django.urls import reverse
@@ -98,15 +98,18 @@ def create_transaction(request):
 def loans(request):
     context = {}
     context["loans"] = Loan.objects.filter(customer__id=request.user.id)
+    context["customer"] = get_object_or_404(Customer, pk=request.user.id)
     return render(request, "base/loan_list.html", context)
 
 @login_required
+@user_passes_test(lambda u: get_object_or_404(Customer, pk=u.id).rank > 1)
 def loan_details(request, account_no):
     context = {}
     context["loan"] = get_object_or_404(Loan, account_no=account_no)
     return render(request, "base/loan_details.html", context)
 
 @login_required
+@user_passes_test(lambda u: get_object_or_404(Customer, pk=u.id).rank > 1)
 def apply_loan(request):
     context = {}
     if request.method == "POST":
@@ -121,6 +124,7 @@ def apply_loan(request):
     return render(request, "base/loan_create.html", context)
 
 @login_required
+@user_passes_test(lambda u: get_object_or_404(Customer, pk=u.id).rank > 1)
 def loan_payment(request, account_no):
     context = {}
     is_loan = True
