@@ -69,14 +69,17 @@ class Employee(User):
     class Meta:
         db_table = 'employees'
 
+
 class BaseAccount(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     account_no = models.IntegerField(unique=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         abstract = True
+
 
 class Account(BaseAccount):
     CHECKING = 1
@@ -89,6 +92,7 @@ class Account(BaseAccount):
     ]
 
     type = models.PositiveSmallIntegerField(choices=ACCOUNT_TYPES)
+
     class Meta:
         db_table = 'accounts'
 
@@ -101,7 +105,7 @@ class Account(BaseAccount):
 
     def __str__(self):
         return f'{self.name}: ${self.balance}'
-        
+
     @classmethod
     def make_bank_transaction(cls, credit_account, debit_account, amount, own_message, message):
         id = uuid.uuid4()
@@ -124,11 +128,12 @@ class Account(BaseAccount):
 
     @property
     def balance(self):
-       return self.transactions.aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
+        return self.transactions.aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
 
     @property
     def transactions(self):
         return Ledger.objects.filter(account=self).order_by("-created_at")
+
 
 class Loan(BaseAccount):
     PENDING = 1
@@ -141,7 +146,8 @@ class Loan(BaseAccount):
     ]
 
     amount = models.IntegerField()
-    status = models.PositiveSmallIntegerField(choices=STATUS_TYPES, default=PENDING)
+    status = models.PositiveSmallIntegerField(
+        choices=STATUS_TYPES, default=PENDING)
 
     class Meta:
         db_table = 'loans'
@@ -179,10 +185,10 @@ class Loan(BaseAccount):
     @property
     def total_paid(self):
         return self.transactions.aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
-    
+
     @property
     def total_debt(self):
-       return self.amount - self.total_paid
+        return self.amount - self.total_paid
 
     @property
     def percent_finish(self):
@@ -191,6 +197,7 @@ class Loan(BaseAccount):
     @property
     def transactions(self):
         return Ledger.objects.filter(loan=self)
+
 
 class Ledger(models.Model):
     CREDIT = 1
@@ -201,8 +208,10 @@ class Ledger(models.Model):
     ]
 
     transaction_id = models.CharField(max_length=50)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, blank=True, null=True)
-    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, blank=True, null=True)
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, blank=True, null=True)
+    loan = models.ForeignKey(
+        Loan, on_delete=models.CASCADE, blank=True, null=True)
     amount = models.DecimalField(decimal_places=2, max_digits=12)
     type = models.PositiveSmallIntegerField(choices=TRANSACTION_TYPES)
     message = models.CharField(max_length=100)
@@ -210,22 +219,44 @@ class Ledger(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     @classmethod
-    def make_external_transfer(cls, credit_account, debit_account, amount, message, external_bank_id):
+    def make_external_transfer(cls, credit_account, debit_account, amount, own_message, message, external_bank_id):
         with transaction.atomic():
+            id = uuid.uuid4()
             request_body = {
+                "id": str(id),
                 "senderBankId": Bank.objects.get(external=False).id,
                 "receiverBankId": external_bank_id,
                 "senderAccountNumber": debit_account.account_no,
-                "receiverAccountNumber": credit_account.account_no,
-                "amount": amount,
+                "receiverAccountNumber": credit_account,
+                "amount": str(amount),
                 "message": message
             }
+
             request_headers = {
                 "Token": os.environ['BANK_CONTROLLER_TOKEN'],
                 "Content-Type": "application/json"
             }
             request_url = os.environ['BANK_CONTROLLER_ENDPOINT']
-            request = requests.post(
-                request_url, data=request_body, headers=request_headers)
-            data = request.json
-            print(data)
+            response = requests.post(
+                request_url, json=request_body, headers=request_headers)
+            if response.status_code == 200:
+                Ledger.objects.create(
+                    transaction_id=id,
+                    account=debit_account,
+                    amount=-amount,
+                    type=cls.DEBIT,
+                    message=own_message,
+                )
+            else:
+                print(f"External transfer failed!! {response.json()}")
+
+    @classmethod
+    def receive_external_transfer(cls, credit_account, amount, message, transaction_id):
+        with transaction.atomic():
+            Ledger.objects.create(
+                transaction_id=transaction_id,
+                account=credit_account,
+                amount=amount,
+                message=message,
+                type=cls.CREDIT
+            )

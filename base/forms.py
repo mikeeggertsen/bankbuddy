@@ -1,6 +1,7 @@
 from calendar import c
 from django.forms import CharField, ChoiceField, IntegerField, ModelChoiceField, ModelForm, NumberInput, PasswordInput, TextInput, ValidationError
-from .models import Account, AccountLedger, Bank, Customer, Loan, User
+from .models import Account, Ledger, Bank, Customer, Loan, User
+
 
 class AccountCreationForm(ModelForm):
     type = ChoiceField(choices=Account.ACCOUNT_TYPES)
@@ -12,6 +13,7 @@ class AccountCreationForm(ModelForm):
             self.fields[field].widget.attrs.update({
                 'class': 'bb-input'
             })
+
     class Meta:
         model = Account
         fields = ["name"]
@@ -22,12 +24,14 @@ class AccountCreationForm(ModelForm):
             }),
         }
 
+
 class TransactionCreationForm(ModelForm):
     bank = ModelChoiceField(queryset=Bank.objects.all(), required=False)
     to_account = CharField()
     own_message = CharField(max_length=255)
+
     class Meta:
-        model = AccountLedger
+        model = Ledger
         fields = ["account", "amount", "message"]
         widgets = {
             "amount": NumberInput(attrs={
@@ -47,9 +51,9 @@ class TransactionCreationForm(ModelForm):
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-               'class': 'bb-input',
+                'class': 'bb-input',
             })
-        
+
         self.is_loan = is_loan
         if is_loan:
             self.fields["to_account"].widget.attrs["readonly"] = True
@@ -57,7 +61,8 @@ class TransactionCreationForm(ModelForm):
     def clean_to_account(self):
         cleaned_data = super(TransactionCreationForm, self).clean()
         to_account = cleaned_data["to_account"]
-        #TODO ADD EXTERNAL BANK ACCOUNT CHECK
+
+        # TODO ADD EXTERNAL BANK ACCOUNT CHECK
         if self.is_loan and not Loan.objects.filter(account_no=to_account).exists():
             raise ValidationError("No account exists with this account no.")
 
@@ -72,16 +77,19 @@ class TransactionCreationForm(ModelForm):
         if account.balance < amount:
             raise ValidationError({"account": "Account has inefficient funds"})
         if amount <= 0:
-            raise ValidationError({"amount": "Amount must be a greater than $0"})
+            raise ValidationError(
+                {"amount": "Amount must be a greater than $0"})
         return cleaned_data
 
+
 class ProfileForm(ModelForm):
-    password = CharField(widget=PasswordInput,required=False)
-    confirm_password = CharField(widget=PasswordInput,required=False)
-    class Meta: 
+    password = CharField(widget=PasswordInput, required=False)
+    confirm_password = CharField(widget=PasswordInput, required=False)
+
+    class Meta:
         model = Customer
         fields = ["first_name", "last_name", "phone", "email", "rank"]
-     
+
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)
         self.fields["first_name"].widget.attrs['placeholder'] = "Firstname"
@@ -91,7 +99,7 @@ class ProfileForm(ModelForm):
         self.fields["rank"].widget.attrs['placeholder'] = "Rank"
         self.fields["password"].widget.attrs['placeholder'] = "Password"
         self.fields["confirm_password"].widget.attrs['placeholder'] = "Confirm password"
-        
+
         for field in self.fields:
             self.fields[field].widget.attrs.update({
                 'class': 'bb-input',
@@ -101,14 +109,14 @@ class ProfileForm(ModelForm):
         cleaned_data = super(ProfileForm, self).clean()
         email = cleaned_data["email"]
         if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
-            raise ValidationError("User with this email already exists") 
+            raise ValidationError("User with this email already exists")
         return email
 
     def clean_phone(self):
         cleaned_data = super(ProfileForm, self).clean()
         phone = cleaned_data["phone"]
         if User.objects.filter(phone=phone).exclude(pk=self.instance.pk).exists():
-            raise ValidationError("User with this phone no. already exists") 
+            raise ValidationError("User with this phone no. already exists")
         return phone
 
     def clean(self):
@@ -116,12 +124,13 @@ class ProfileForm(ModelForm):
         password = cleaned_data["password"]
         confirm_password = cleaned_data["confirm_password"]
         if password != confirm_password:
-            raise ValidationError({"password": "Password must match"}) 
+            raise ValidationError({"password": "Password must match"})
         return cleaned_data
 
 
 class LoanForm(ModelForm):
     accounts = ModelChoiceField(queryset=None, required=True)
+
     class Meta:
         model = Loan
         fields = ["amount", "name"]
@@ -131,9 +140,10 @@ class LoanForm(ModelForm):
         self.fields["accounts"].empty_label = "Select an account"
         self.fields["amount"].widget.attrs['placeholder'] = "Amount"
         self.fields["name"].widget.attrs['placeholder'] = "Name of loan"
-        self.fields["accounts"].queryset = Account.objects.filter(customer__id=customer_id)
+        self.fields["accounts"].queryset = Account.objects.filter(
+            customer__id=customer_id)
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-               'class': 'bb-input'
+                'class': 'bb-input'
             })
