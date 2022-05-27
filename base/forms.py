@@ -1,6 +1,6 @@
 from calendar import c
-from django.forms import CharField, ChoiceField,  ModelChoiceField, ModelForm, NumberInput, PasswordInput, TextInput, ValidationError
-from .models import Account, Ledger, Bank, Customer, Loan, User
+from django.forms import CharField, ChoiceField, IntegerField, ModelChoiceField, ModelForm, NumberInput, PasswordInput, TextInput, ValidationError
+from .models import Account, AccountLedger, Bank, Customer, Loan, User
 
 class AccountCreationForm(ModelForm):
     type = ChoiceField(choices=Account.ACCOUNT_TYPES)
@@ -27,7 +27,7 @@ class TransactionCreationForm(ModelForm):
     to_account = CharField()
     own_message = CharField(max_length=255)
     class Meta:
-        model = Ledger
+        model = AccountLedger
         fields = ["account", "amount", "message"]
         widgets = {
             "amount": NumberInput(attrs={

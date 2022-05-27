@@ -1,0 +1,27 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<div class="h-full w-full">
+    <div class="flex flex-col justify-center gap-4">
+       <h1 class="text-3xl font-semibold">Please verify your credentials</h1>
+       <p class="text-sm text-gray-500">Enter SMS verification code</p>
+       <form class="flex flex-col gap-2" method="POST">
+          {% csrf_token %}
+          <div class="flex flex-col gap-4">
+             <div class="flex flex-col">
+                <label class="text-[12px] font-bold" for="email">Code</label>
+                {{form.code}}
+             </div>
+          </div>
+          {% if error %} 
+             <p class="text-red-500 text-[12px]">{{error}}</p>
+          {% endif %}
+          <button type="submit" class="w-full bg-primary text-white py-2 rounded">Verify</button>
+       </form>
+       <form action="{% url "authsystem:resend_sms" %}" method="POST">
+          {% csrf_token %}
+         <button type="submit" class="text-sm text-primary">Send sms again</button>
+       </form>
+    </div>
+ </div>
+{% endblock %}

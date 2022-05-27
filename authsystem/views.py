@@ -1,9 +1,9 @@
 from django.urls import reverse
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout
-from authsystem.forms import CustomerCreationForm, UserSignInForm
-from base.models import Bank, Customer
+from authsystem.forms import CustomerCreationForm, UserSignInForm, VerifyForm
+from authsystem.models import VerificationCode
+from base.models import Bank, Customer, User
 
 def sign_in(request):
     context = {}
@@ -17,15 +17,13 @@ def sign_in(request):
         if form.is_valid():
             email = form.cleaned_data["email"]
             password = form.cleaned_data["password"]
-            print(email, password)
             user = authenticate(request, email=email, password=password)
-            print(user)
             if user:
-                login(request, user)
-                return HttpResponseRedirect(reverse("base:dashboard"))
+                VerificationCode.send_code(user)
+                request.session["user_id"] = user.pk
+                return redirect(reverse('authsystem:verify'))
             else:
-                context["error"] = "Email or password is incorrect"
-                return render(request, "authsystem/sign_in.html", context)
+                context["error"] = "Invalid email or password"
 
     form = UserSignInForm()
     context["form"] = form
@@ -34,7 +32,7 @@ def sign_in(request):
 
 def sign_out(request):
     logout(request)
-    return HttpResponseRedirect(reverse("authsystem:sign_in"))
+    return redirect(reverse("authsystem:sign_in"))
 
 
 def sign_up(request):
@@ -49,7 +47,7 @@ def sign_up(request):
         if form.is_valid():
             try:
                 Customer.objects.create_user(**form.cleaned_data)
-                return HttpResponseRedirect(reverse('authsystem:sign_in'))
+                return redirect(reverse('authsystem:sign_in'))
             except Exception:
                 context["error"] = "Unable to create customer account. Please try again"
         return render(request, "authsystem/sign_up.html", context)
@@ -59,6 +57,47 @@ def sign_up(request):
     context["form"] = form
     return render(request, "authsystem/sign_up.html", context)
 
+def verify(request):
+    context = {}
+
+    if request.user.is_authenticated:
+        return redirect(reverse("base:dashboard"))
+
+    if (request.method == "POST"):
+        form = VerifyForm(request.POST)
+        context["form"] = form
+        if form.is_valid():
+            code = form.cleaned_data["code"]
+            user_id = None
+            try:
+                user_id = VerificationCode.verify(code)
+            except Exception as e:
+                context["error"] = e
+                return render(request, "authsystem/verify.html", context)
+            if user_id:
+                user = get_object_or_404(User, pk=user_id)
+                if user:
+                    login(request, user)
+                    return redirect(reverse("base:dashboard"))
+            else:
+                context["error"] = "Invalid verification code"
+        return render(request, "authsystem/verify.html", context)
+
+    context["form"] = VerifyForm()
+    return render(request, "authsystem/verify.html", context)
+
+def resend_sms(request):
+    if request.user.is_authenticated:
+        return redirect(reverse("base:dashboard"))
+    
+    if request.method == "POST":
+        if request.session["user_id"]:
+            user_id = request.session["user_id"]
+            del request.session["user_id"]
+            user = get_object_or_404(User, pk=user_id)
+            VerificationCode.send_code(user)
+      
+    return redirect(reverse("authsystem:verify"))
 
 def password_reset(request):
     pass

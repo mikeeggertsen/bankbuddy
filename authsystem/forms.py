@@ -50,3 +50,14 @@ class CustomerCreationForm(ModelForm):
             self.fields[field].widget.attrs.update({
                 'class': 'border-0 rounded w-full bg-white shadow'
             })
+
+class VerifyForm(Form):
+    code = CharField(widget=TextInput(attrs={"placeholder": "Verification code"}), max_length=5)
+
+    def __init__(self, *args, **kwargs):
+        super(VerifyForm, self).__init__(*args, **kwargs)
+
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'border-0 rounded w-full bg-white shadow'
+            })
