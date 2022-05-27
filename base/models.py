@@ -69,8 +69,16 @@ class Employee(User):
     class Meta:
         db_table = 'employees'
 
+class BaseAccount(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    account_no = models.IntegerField(unique=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        abstract = True
 
-class Account(models.Model):
+class Account(BaseAccount):
     CHECKING = 1
     SAVINGS = 2
     SALARY = 3
@@ -80,58 +88,20 @@ class Account(models.Model):
         (SALARY, 'Salary'),
     ]
 
-    customer = models.ForeignKey(
-        Customer, on_delete=models.CASCADE, related_name='customer')
-    name = models.CharField(max_length=255)
-    account_no = models.IntegerField(unique=True)
     type = models.PositiveSmallIntegerField(choices=ACCOUNT_TYPES)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         db_table = 'accounts'
-
-    def __str__(self):
-        return f'{self.name} - ${self.balance}'
 
     def save(self, *args, **kwargs):
         if self.account_no is None:
             numOfAccounts = Account.objects.all().count()
-            self.account_no = settings.START_ACCOUNT_NO + numOfAccounts + 1
+            numOfLoans = Loan.objects.all().count()
+            self.account_no = settings.START_ACCOUNT_NO + numOfAccounts + numOfLoans + 1
         super(Account, self).save(*args, **kwargs)
 
-    @property
-    def transactions(self):
-        return Ledger.objects.filter(account=self)
-
-    @property
-    def balance(self):
-       return self.transactions.aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
-
-
-class Ledger(models.Model):
-    CREDIT = 1
-    DEBIT = 2
-    TRANSACTION_TYPES = [
-        (CREDIT, 'Credit'),
-        (DEBIT, 'Debit'),
-    ]
-
-    transaction_id = models.CharField(max_length=50)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    amount = models.DecimalField(decimal_places=2, max_digits=12)
-    type = models.PositiveSmallIntegerField(choices=TRANSACTION_TYPES)
-    message = models.CharField(max_length=100)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-created_at']
-        db_table = 'ledger'
-
     def __str__(self):
-        return f'{self.TRANSACTION_TYPES[self.type - 1][1]} - Account {self.account} - Amount ${self.amount}'
-
+        return f'{self.name}: ${self.balance}'
+        
     @classmethod
     def make_bank_transaction(cls, credit_account, debit_account, amount, own_message, message):
         id = uuid.uuid4()
@@ -151,7 +121,94 @@ class Ledger(models.Model):
                 message=own_message,
             ).save()
         return id
+
+    @property
+    def balance(self):
+       return self.transactions.aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
+
+    @property
+    def transactions(self):
+        return Ledger.objects.filter(account=self).order_by("-created_at")
+
+class Loan(BaseAccount):
+    PENDING = 1
+    APPROVED = 2
+    REJECTED = 3
+    STATUS_TYPES = [
+        (PENDING, 'Pending'),
+        (APPROVED, 'Approved'),
+        (REJECTED, 'Rejected')
+    ]
+
+    amount = models.IntegerField()
+    status = models.PositiveSmallIntegerField(choices=STATUS_TYPES, default=PENDING)
+
+    class Meta:
+        db_table = 'loans'
+
+    def save(self, *args, **kwargs):
+        if self.account_no is None:
+            numOfAccounts = Account.objects.all().count()
+            numOfLoans = Loan.objects.all().count()
+            self.account_no = settings.START_ACCOUNT_NO + numOfAccounts + numOfLoans + 1
+        super(Loan, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.name}: ${self.total_debt}'
+
+    @classmethod
+    def make_bank_transaction(cls, credit_account, debit_account, amount, own_message, message):
+        id = uuid.uuid4()
+        with transaction.atomic():
+            Ledger.objects.create(
+                transaction_id=id,
+                loan=credit_account,
+                amount=amount,
+                type=1,
+                message=message,
+            ).save()
+            Ledger.objects.create(
+                transaction_id=id,
+                account=debit_account,
+                amount=-amount,
+                type=2,
+                message=own_message,
+            ).save()
+        return id
+
+    @property
+    def total_paid(self):
+        return self.transactions.aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
     
+    @property
+    def total_debt(self):
+       return self.amount - self.total_paid
+
+    @property
+    def percent_finish(self):
+        return self.total_paid / self.amount * 100
+
+    @property
+    def transactions(self):
+        return Ledger.objects.filter(loan=self)
+
+class Ledger(models.Model):
+    CREDIT = 1
+    DEBIT = 2
+    TRANSACTION_TYPES = [
+        (CREDIT, 'Credit'),
+        (DEBIT, 'Debit'),
+    ]
+
+    transaction_id = models.CharField(max_length=50)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, blank=True, null=True)
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, blank=True, null=True)
+    amount = models.DecimalField(decimal_places=2, max_digits=12)
+    type = models.PositiveSmallIntegerField(choices=TRANSACTION_TYPES)
+    message = models.CharField(max_length=100)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     @classmethod
     def make_external_transfer(cls, credit_account, debit_account, amount, message, external_bank_id):
         with transaction.atomic():
@@ -172,26 +229,3 @@ class Ledger(models.Model):
                 request_url, data=request_body, headers=request_headers)
             data = request.json
             print(data)
-
-
-class Loan(models.Model):
-    PENDING = 1
-    APPROVED = 2
-    REJECTED = 3
-    STATUS_TYPES = [
-        (PENDING, 'Pending'),
-        (APPROVED, 'Approved'),
-        (REJECTED, 'Rejected')
-    ]
-
-    status = models.PositiveSmallIntegerField(
-        choices=STATUS_TYPES, default=PENDING)
-    customer = models.ForeignKey(
-        Customer, on_delete=models.CASCADE, related_name='loans',)
-    amount = models.DecimalField(decimal_places=2, max_digits=12)
-    balance = models.DecimalField(decimal_places=2, max_digits=12)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'loans'
