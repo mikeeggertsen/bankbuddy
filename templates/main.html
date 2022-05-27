@@ -13,6 +13,11 @@
     <script src="{% static 'js/dashboard.js' %}"></script>
     <script src="{% static 'js/transfer.js' %}"></script>
     <link
+      href="{% static 'css/style.css' %}"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link
       href="{% static 'fontawesomefree/css/all.min.css' %}"
       rel="stylesheet"
       type="text/css"
@@ -27,7 +32,7 @@
         {% if user.is_authenticated %}
           {% include 'sidebar.html' %}
         {% endif %}
-        <div class="pb-20 lg:pt-8 px-6 max-w-3xl w-full lg:mx-auto">
+        <div class="pb-20 lg:pt-8 px-6 max-w-3xl w-full h-full lg:mx-auto">
           {%block content%}
           {%endblock%}
         </div>

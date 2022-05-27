@@ -4,11 +4,9 @@ $(document).ready(() => {
     const { 1: path } = location.pathname.split('/');
     const { 1: href } = anchor.pathname.split('/');
     if (path === href) {
-      $(this).addClass('active-menu-item');
-      $(this).removeClass('menu-item');
+      $(this).addClass('active');
     } else {
-      $(this).addClass('menu-item');
-      $(this).removeClass('active-menu-item');
+      $(this).removeClass('active');
     }
   });
 });
