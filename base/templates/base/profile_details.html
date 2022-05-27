@@ -38,21 +38,12 @@
         <div class="flex flex-col">
             <label class="text-[12px] font-bold" for="{{ form.email.id_for_label }}">Email</label>
             {{form.email.value}}
-            {{form.email}}
+            {{form.email.as_hidden}}
         </div>
         <div class="flex flex-col">
             <label class="text-[12px] font-bold" for="{{ form.rank.id_for_label }}">Rank</label>
-            {{form.rank}}
-            {% if form.rank.value == 1 %}
-                <p>Basic</p>
-            {% elif form.rank.value == 2 %}
-                <p>Silver</p>
-            {% elif form.rank.value == 3 %}
-                <p>Gold</p>
-            {% else %}
-                <p>Undefined</p>
-            {% endif %}
+            {{form.instance.get_rank_display}}
         </div>
-        <button type="submit" class="w-full bg-primary text-white py-2 rounded">Save</button>
+        <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg shadow-md">Save</button>
     </form>
 {% endblock %}
