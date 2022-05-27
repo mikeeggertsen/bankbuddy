@@ -1,5 +1,4 @@
 from decimal import Decimal
-from logging import exception
 import os
 import uuid
 import requests
@@ -70,14 +69,17 @@ class Employee(User):
     class Meta:
         db_table = 'employees'
 
+
 class BaseAccount(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     account_no = models.IntegerField(unique=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         abstract = True
+
 
 class Account(BaseAccount):
     CHECKING = 1
@@ -90,6 +92,7 @@ class Account(BaseAccount):
     ]
 
     type = models.PositiveSmallIntegerField(choices=ACCOUNT_TYPES)
+
     class Meta:
         db_table = 'accounts'
 
@@ -102,7 +105,7 @@ class Account(BaseAccount):
 
     def __str__(self):
         return f'{self.name}: ${self.balance}'
-        
+
     @classmethod
     def make_bank_transaction(cls, credit_account, debit_account, amount, own_message, message):
         id = uuid.uuid4()
@@ -131,6 +134,7 @@ class Account(BaseAccount):
     def transactions(self):
         return Ledger.objects.filter(account=self).order_by("-created_at")
 
+
 class Loan(BaseAccount):
     PENDING = 1
     APPROVED = 2
@@ -142,7 +146,8 @@ class Loan(BaseAccount):
     ]
 
     amount = models.IntegerField()
-    status = models.PositiveSmallIntegerField(choices=STATUS_TYPES, default=PENDING)
+    status = models.PositiveSmallIntegerField(
+        choices=STATUS_TYPES, default=PENDING)
 
     class Meta:
         db_table = 'loans'
@@ -180,10 +185,10 @@ class Loan(BaseAccount):
     @property
     def total_paid(self):
         return self.transactions.aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
-    
+
     @property
     def total_debt(self):
-       return self.amount - self.total_paid
+        return self.amount - self.total_paid
 
     @property
     def percent_finish(self):
@@ -192,6 +197,7 @@ class Loan(BaseAccount):
     @property
     def transactions(self):
         return Ledger.objects.filter(loan=self)
+
 
 class Ledger(models.Model):
     CREDIT = 1
@@ -202,8 +208,10 @@ class Ledger(models.Model):
     ]
 
     transaction_id = models.CharField(max_length=50)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, blank=True, null=True)
-    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, blank=True, null=True)
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, blank=True, null=True)
+    loan = models.ForeignKey(
+        Loan, on_delete=models.CASCADE, blank=True, null=True)
     amount = models.DecimalField(decimal_places=2, max_digits=12)
     type = models.PositiveSmallIntegerField(choices=TRANSACTION_TYPES)
     message = models.CharField(max_length=100)

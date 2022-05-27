@@ -1,6 +1,6 @@
 from calendar import c
 from django.forms import CharField, ChoiceField, IntegerField, ModelChoiceField, ModelForm, NumberInput, PasswordInput, TextInput, ValidationError
-from .models import Account, AccountLedger, Bank, Customer, Loan, User
+from .models import Account, Ledger, Bank, Customer, Loan, User
 
 
 class AccountCreationForm(ModelForm):
@@ -31,7 +31,7 @@ class TransactionCreationForm(ModelForm):
     own_message = CharField(max_length=255)
 
     class Meta:
-        model = AccountLedger
+        model = Ledger
         fields = ["account", "amount", "message"]
         widgets = {
             "amount": NumberInput(attrs={
@@ -51,9 +51,9 @@ class TransactionCreationForm(ModelForm):
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-               'class': 'bb-input',
+                'class': 'bb-input',
             })
-        
+
         self.is_loan = is_loan
         if is_loan:
             self.fields["to_account"].widget.attrs["readonly"] = True
@@ -62,7 +62,7 @@ class TransactionCreationForm(ModelForm):
         cleaned_data = super(TransactionCreationForm, self).clean()
         to_account = cleaned_data["to_account"]
 
-        #TODO ADD EXTERNAL BANK ACCOUNT CHECK
+        # TODO ADD EXTERNAL BANK ACCOUNT CHECK
         if self.is_loan and not Loan.objects.filter(account_no=to_account).exists():
             raise ValidationError("No account exists with this account no.")
 
@@ -77,7 +77,8 @@ class TransactionCreationForm(ModelForm):
         if account.balance < amount:
             raise ValidationError({"account": "Account has inefficient funds"})
         if amount <= 0:
-            raise ValidationError({"amount": "Amount must be a greater than $0"})
+            raise ValidationError(
+                {"amount": "Amount must be a greater than $0"})
         return cleaned_data
 
 
@@ -98,7 +99,7 @@ class ProfileForm(ModelForm):
         self.fields["rank"].widget.attrs['placeholder'] = "Rank"
         self.fields["password"].widget.attrs['placeholder'] = "Password"
         self.fields["confirm_password"].widget.attrs['placeholder'] = "Confirm password"
-        
+
         for field in self.fields:
             self.fields[field].widget.attrs.update({
                 'class': 'bb-input',
@@ -129,6 +130,7 @@ class ProfileForm(ModelForm):
 
 class LoanForm(ModelForm):
     accounts = ModelChoiceField(queryset=None, required=True)
+
     class Meta:
         model = Loan
         fields = ["amount", "name"]
@@ -138,9 +140,10 @@ class LoanForm(ModelForm):
         self.fields["accounts"].empty_label = "Select an account"
         self.fields["amount"].widget.attrs['placeholder'] = "Amount"
         self.fields["name"].widget.attrs['placeholder'] = "Name of loan"
-        self.fields["accounts"].queryset = Account.objects.filter(customer__id=customer_id)
+        self.fields["accounts"].queryset = Account.objects.filter(
+            customer__id=customer_id)
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-               'class': 'bb-input'
+                'class': 'bb-input'
             })
