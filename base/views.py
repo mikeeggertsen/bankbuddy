@@ -81,14 +81,13 @@ def create_transaction(request):
         form = TransactionCreationForm(request.POST)
         context["form"] = form
         if form.is_valid():
-            from_account_no = form.cleaned_data["account"]
+            account = form.cleaned_data["account"]
             account_no = form.cleaned_data["to_account"]
             amount = form.cleaned_data["amount"]
             own_message = form.cleaned_data["own_message"]
             message = form.cleaned_data["message"]
             bank = form.cleaned_data["bank"]
             to_account = Account.objects.filter(account_no=account_no)
-            account = Account.objects.get(account_no=from_account_no)
 
             if account.customer.id != request.user.id:
                 print("Not your account!!")  # TODO show error to user
@@ -97,7 +96,7 @@ def create_transaction(request):
             if bank is not None:
                 Ledger.make_external_transfer(
                     credit_account=account_no,
-                    debit_account=account.account_no,
+                    debit_account=account,
                     amount=amount,
                     own_message=f"{bank.id}#{account_no}: '{own_message}'",
                     message=message,
@@ -178,7 +177,7 @@ def transfer_request(request):
         message = data['message']
 
         try:
-            Account.objects.get(account_no=account_number)
+            credit_account = Account.objects.get(account_no=account_number)
         except:
             response = {
                 "message": "Could not find account with that number",
@@ -188,7 +187,7 @@ def transfer_request(request):
 
         try:
             Ledger.receive_external_transfer(
-                credit_account=account_number,
+                credit_account=credit_account,
                 amount=amount,
                 message=f"{bank_id}#{sender_bank_account}: {message}",
                 transaction_id=transaction_id

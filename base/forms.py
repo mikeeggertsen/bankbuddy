@@ -65,8 +65,7 @@ class TransactionCreationForm(ModelForm):
 
     def clean(self):
         cleaned_data = super(TransactionCreationForm, self).clean()
-        account_no = cleaned_data["account"]
-        account = Account.objects.get(account_no=account_no)
+        account = cleaned_data["account"]
         amount = cleaned_data["amount"]
         if account.balance < amount:
             raise ValidationError({"account": "Account has inefficient funds"})

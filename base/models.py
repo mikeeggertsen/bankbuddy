@@ -103,7 +103,7 @@ class Account(models.Model):
 
     @property
     def transactions(self):
-        return Ledger.objects.filter(account=self.account_no)
+        return Ledger.objects.filter(account=self)
 
     @property
     def balance(self):
@@ -119,7 +119,8 @@ class Ledger(models.Model):
     ]
 
     transaction_id = models.CharField(max_length=50)
-    account = models.CharField(max_length=50)
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name='account')
     amount = models.DecimalField(decimal_places=2, max_digits=12)
     type = models.PositiveSmallIntegerField(choices=TRANSACTION_TYPES)
     message = models.CharField(max_length=100)
@@ -161,7 +162,7 @@ class Ledger(models.Model):
                 "id": str(id),
                 "senderBankId": Bank.objects.get(external=False).id,
                 "receiverBankId": external_bank_id,
-                "senderAccountNumber": debit_account,
+                "senderAccountNumber": debit_account.account_no,
                 "receiverAccountNumber": credit_account,
                 "amount": str(amount),
                 "message": message
