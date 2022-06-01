@@ -1,8 +1,10 @@
-from django.forms import CharField, ChoiceField,  ModelChoiceField, ModelForm, NumberInput, PasswordInput, TextInput, ValidationError
-from .models import Account, Ledger, Bank, Customer, Loan, User
+from django.forms import CharField, ChoiceField, DateField, DateInput, DateTimeField,  ModelChoiceField, ModelForm, NumberInput, PasswordInput, TextInput, ValidationError
 
+from base.constants import ACCOUNT_TYPES
+from .models import Account, Ledger, Bank, Customer, Loan, User
+from django.utils import timezone
 class AccountForm(ModelForm):
-    type = ChoiceField(choices=Account.ACCOUNT_TYPES)
+    type = ChoiceField(choices=ACCOUNT_TYPES)
 
     def __init__(self, is_staff, *args, **kwargs):
         super(AccountForm, self).__init__(*args, **kwargs)
@@ -27,6 +29,7 @@ class TransactionForm(ModelForm):
     bank = ModelChoiceField(queryset=Bank.objects.all(), required=False)
     to_account = CharField()
     own_message = CharField(max_length=255)
+    scheduled_date = DateField(required=False)
 
     class Meta:
         model = Ledger
@@ -44,6 +47,10 @@ class TransactionForm(ModelForm):
         super(TransactionForm, self).__init__(*args, **kwargs)
         self.fields['own_message'].widget.attrs['placeholder'] = 'Message to your account'
         self.fields["to_account"].widget.attrs['placeholder'] = "Account no."
+        self.fields["scheduled_date"].widget = DateInput(attrs={
+            "placeholder": "Scheduled date",
+            "type": "date", 
+        })
         self.fields["account"].empty_label = "Select an account"
         self.fields["bank"].empty_label = "Select a bank"
 
@@ -67,6 +74,14 @@ class TransactionForm(ModelForm):
         if not self.is_loan and not Account.objects.filter(account_no=to_account).exists():
             raise ValidationError("No account exists with this account no.")
         return to_account
+
+    def clean_scheduled_date(self):
+        cleaned_data = super(TransactionForm, self).clean()
+        scheduled_date = cleaned_data["scheduled_date"]
+
+        if scheduled_date and scheduled_date < timezone.now().date():
+            raise ValidationError("Scheduled date must be in the future")
+        return scheduled_date
 
     def clean(self):
         cleaned_data = super(TransactionForm, self).clean()
