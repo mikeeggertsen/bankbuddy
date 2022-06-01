@@ -5,3 +5,10 @@
   margin-top: 4px;
   border: none;
 }
+
+.select-input {
+  border: none;
+  background-color: ghostwhite;
+  font-size: 14px;
+  font-weight: 500;
+}
