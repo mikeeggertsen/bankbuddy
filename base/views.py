@@ -24,7 +24,7 @@ def dashboard(request):
         approved = Loan.objects.filter(status=2).count()
         rejected = Loan.objects.filter(status=3).count()
         context["loans"] = [pending, approved, rejected]
-        context["total_funds"] = Bank.total_funds
+        context["total_funds"] = Bank().total_funds
         context["total_customers"] = Customer.objects.all().count()
         context["total_accounts"] = Account.objects.all().count()
 
