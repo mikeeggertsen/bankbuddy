@@ -46,7 +46,7 @@ def dashboard(request):
             context["labels"] = labels
         return render(request, 'base/admin/dashboard.html', context)
     else:
-        account = Account.objects.filter(customer__id=request.user.id)
+        account = Account.objects.filter(customer__id=request.user.id).order_by("created_at")[:1].get()
         transaction_filter = request.GET.get('q', '')
         if account:
             context["transactions"] = account.transactions
