@@ -13,7 +13,7 @@ class UserSignInForm(Form):
                     'class': 'border-0 rounded w-full bg-white shadow'
                 })
 
-class CustomerCreationForm(ModelForm): 
+class CustomerForm(ModelForm): 
     first_name = CharField(widget=TextInput(attrs={"placeholder": "Firstname"}), required=True)
     last_name = CharField(widget=TextInput(attrs={"placeholder": "Lastname"}), required=True)
     class Meta:
@@ -43,7 +43,7 @@ class CustomerCreationForm(ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(CustomerCreationForm, self).__init__(*args, **kwargs)
+        super(CustomerForm, self).__init__(*args, **kwargs)
         self.fields["bank"].empty_label = "Select a bank"
 
         for field in self.fields:

@@ -4,6 +4,7 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
+from authsystem.forms import CustomerForm
 from base.forms import AccountForm, LoanForm, LoanStatusForm, ProfileForm, RankForm, TransactionForm
 from django.urls import reverse
 from django.contrib.auth import update_session_auth_hash
@@ -14,8 +15,6 @@ from django.db.models import Count
 from django.core.paginator import Paginator
 
 # DASHBOARD
-
-
 @login_required
 def dashboard(request):
     context = {}
@@ -61,7 +60,7 @@ def dashboard(request):
 @staff_member_required
 def customers(request):
     context = {}
-    customers = Customer.objects.all()
+    customers = Customer.objects.all().order_by("-created_at")
     paginator = Paginator(customers, 10)
     page_number = request.GET.get('page')
     context["customers"] = paginator.get_page(page_number)
@@ -84,9 +83,19 @@ def customer_details(request, id):
     context["accounts"] = Account.objects.filter(customer__id=id)
     return render(request, "base/admin/customer_details.html", context)
 
+@staff_member_required
+def create_customer(request):
+    context = {}
+    if request.method == "POST":
+        form = CustomerForm(request.POST)
+        if form.is_valid():
+            Customer.objects.create_user(**form.cleaned_data)
+        return redirect(reverse('base:customers'))
+    context["form"] = CustomerForm()
+    return render(request, "base/admin/customer_create.html", context)
+
+
 # ACCOUNTS
-
-
 @login_required
 def accounts(request):
     context = {}
@@ -132,8 +141,6 @@ def create_account(request):
     return render(request, "base/account_create.html", context)
 
 # TRANSACTIONS
-
-
 @login_required
 def create_transaction(request):
     context = {}
@@ -185,8 +192,6 @@ def create_transaction(request):
     return render(request, "base/transaction_create.html", context)
 
 # LOANS
-
-
 @login_required
 def loans(request):
     context = {}
