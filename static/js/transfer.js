@@ -3,4 +3,8 @@ $(document).ready(() => {
   checkbox.change(function () {
     $('#bank').toggleClass('flex hidden');
   });
+  checkbox = $('#scheduled');
+  checkbox.change(function () {
+    $('#scheduled-date').toggleClass('flex hidden');
+  });
 });
