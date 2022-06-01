@@ -12,4 +12,13 @@
   .transaction-option.active {
     @apply before:absolute before:-bottom-px before:bg-black before:w-full before:h-px;
   }
+  .card {
+    @apply bg-gradient-to-r from-[#485563] to-[#29323c];
+  }
+  .card.silver {
+    @apply bg-gradient-to-r from-[#c9d1d3] to-[#8e9eab];
+  }
+  .card.gold {
+    @apply bg-gradient-to-r from-[#cebe9b] to-[#6D6027];
+  }
 }

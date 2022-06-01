@@ -1,0 +1,64 @@
+{% extends 'main.html' %}
+
+{% block content %}
+    <h1 class="text-2xl font-semibold">Customer details</h1>
+    <div class="card min-h-[8rem] rounded-lg shadow-md p-4 grid gap-2 mt-4">
+        <div class="flex flex-row items-center justify-between">
+        <div class="flex flex-row items-center gap-2">
+            <i class="fa-solid fa-user text-white"></i>
+            <p class="text-white text-14">{{customer.first_name}} {{customer.last_name}}</p>
+        </div>
+            <p id="rank" class="text-white text-[12px]">{{customer.get_rank_display}}</p>
+        </div>
+        <div class="flex flex-col justify-end items-end">
+            <p class="text-white text-[12px]">Joined at: {{customer.created_at|date:"d M Y"}}</p>
+        </div>
+    </div>
+    <div class="flex flex-row justify-between items-center my-2">
+        <h3 class="text-md font-semibold">Details</h3>
+       <form method="POST">
+            {% csrf_token %}
+            {{form.rank}}
+       </form>
+    </div>
+    <div class="flex flex-row gap-16">
+        <div>
+            <p class="text-sm font-semibold">Email</p>
+            <div class="text-[12px] text-gray-400 flex flex-row items-center gap-1">
+                <p>{{customer.email}}</p>
+            </div>
+        </div>
+        <div>
+            <p class="text-sm font-semibold">Phone no.</p>
+            <p class="text-[12px] text-gray-400">{{customer.phone}}</p>
+        </div>
+    </div>
+    <h3 class="text-md font-semibold my-2">Accounts</h3>
+    <div class="flex flex-col gap-4">
+    {% for account in accounts %}
+    <a href="/accounts/{{account.account_no}}">
+        <div class="flex flex-row w-full items-center gap-4">
+            <i class="fa-solid fa-wallet"></i>
+            <div class="w-full">
+                <h4 class="text-sm font-semibold">{{account.name}}</h4>
+                <div class="flex flex-row justify-between">
+                    <p class="text-[12px] text-gray-400">{{account.account_no}}</p>
+                    <p class="text-[12px] text-gray-400">{{account.created_at|date:"d M Y"}}</p>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% empty %}
+        <p class="text-gray-300 text-[12px]">This customer has no accounts</p>
+    {% endfor %}
+    </div>
+    <script>
+        const card = document.querySelector(".card")
+        const rank = document.getElementById("rank").innerText
+        if (rank === 'Silver') {
+            card.classList.add('silver');
+        } else if (rank === 'Gold') {
+            card.classList.add('gold');
+        }
+    </script>
+{% endblock %}

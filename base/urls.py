@@ -5,6 +5,8 @@ app_name = "base"
 
 urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
+    path("customers/", views.customers, name="customers"),
+    path("customers/<int:id>", views.customer_details, name="customer"),
     path("accounts/", views.accounts, name="accounts"),
     path("accounts/new", views.create_account, name="create_account"),
     path("accounts/<int:account_no>", views.account_details, name="account"),

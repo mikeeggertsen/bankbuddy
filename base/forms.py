@@ -1,14 +1,13 @@
-from calendar import c
-from django.forms import CharField, ChoiceField, IntegerField, ModelChoiceField, ModelForm, NumberInput, PasswordInput, TextInput, ValidationError
+from django.forms import CharField, ChoiceField,  ModelChoiceField, ModelForm, NumberInput, PasswordInput, TextInput, ValidationError
 from .models import Account, Ledger, Bank, Customer, Loan, User
 
-
-class AccountCreationForm(ModelForm):
+class AccountForm(ModelForm):
     type = ChoiceField(choices=Account.ACCOUNT_TYPES)
 
-    def __init__(self, *args, **kwargs):
-        super(AccountCreationForm, self).__init__(*args, **kwargs)
-
+    def __init__(self, is_staff, *args, **kwargs):
+        super(AccountForm, self).__init__(*args, **kwargs)
+        if is_staff:
+            self.fields["customer"] = ModelChoiceField(queryset=Customer.objects.all(), empty_label="Choose customer")
         for field in self.fields:
             self.fields[field].widget.attrs.update({
                 'class': 'bb-input'
@@ -24,8 +23,7 @@ class AccountCreationForm(ModelForm):
             }),
         }
 
-
-class TransactionCreationForm(ModelForm):
+class TransactionForm(ModelForm):
     bank = ModelChoiceField(queryset=Bank.objects.all(), required=False)
     to_account = CharField()
     own_message = CharField(max_length=255)
@@ -43,7 +41,7 @@ class TransactionCreationForm(ModelForm):
         }
 
     def __init__(self, is_loan, *args, **kwargs):
-        super(TransactionCreationForm, self).__init__(*args, **kwargs)
+        super(TransactionForm, self).__init__(*args, **kwargs)
         self.fields['own_message'].widget.attrs['placeholder'] = 'Message to your account'
         self.fields["to_account"].widget.attrs['placeholder'] = "Account no."
         self.fields["account"].empty_label = "Select an account"
@@ -59,7 +57,7 @@ class TransactionCreationForm(ModelForm):
             self.fields["to_account"].widget.attrs["readonly"] = True
 
     def clean_to_account(self):
-        cleaned_data = super(TransactionCreationForm, self).clean()
+        cleaned_data = super(TransactionForm, self).clean()
         to_account = cleaned_data["to_account"]
 
         # TODO ADD EXTERNAL BANK ACCOUNT CHECK
@@ -71,7 +69,7 @@ class TransactionCreationForm(ModelForm):
         return to_account
 
     def clean(self):
-        cleaned_data = super(TransactionCreationForm, self).clean()
+        cleaned_data = super(TransactionForm, self).clean()
         account = cleaned_data["account"]
         amount = cleaned_data["amount"]
         if account.balance < amount:
@@ -145,5 +143,25 @@ class LoanForm(ModelForm):
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-                'class': 'bb-input'
+               'class': 'bb-input'
             })
+
+class RankForm(ModelForm):
+    class Meta:
+        model = Customer
+        fields = ["rank"]
+    
+    def __init__(self, *args, **kwargs):
+        super(RankForm, self).__init__(*args, **kwargs)
+        self.fields['rank'].widget.attrs={'onchange': 'form.submit()'}
+        self.fields['rank'].widget.attrs.update({'class': 'select-input'})
+
+class LoanStatusForm(ModelForm):
+    class Meta:
+        model = Loan
+        fields = ["status"]
+
+    def __init__(self, *args, **kwargs):
+        super(LoanStatusForm, self).__init__(*args, **kwargs)
+        self.fields['status'].widget.attrs={'onchange': 'form.submit()'}
+        self.fields['status'].widget.attrs.update({'class': 'select-input'})

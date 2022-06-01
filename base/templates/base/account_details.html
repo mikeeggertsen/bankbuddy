@@ -9,6 +9,15 @@
             <h3 class="text-lg text-white font-semibold">${{account.balance}}</h3>
         </div>
     </div>
+    <h3 class="text-md font-semibold my-2">Customer</h3>
+    {% if user.is_staff %}
+    <div>
+        <div class="text-[12px] text-gray-400 flex flex-row items-center gap-1">
+        <i class="fa-solid fa-user"></i>
+        <p>{{account.customer.first_name}} {{account.customer.last_name}}</p>
+        </div>
+    </div>
+{% endif %}
     <h3 class="text-md font-semibold my-2">Details</h3>
     <div class="flex flex-row gap-16">
         <div>
@@ -31,7 +40,7 @@
     </div>
     <h3 class="text-md font-semibold my-2">Transactions</h3>
     <div class="flex flex-col gap-4">
-    {% for transaction in transactions %}
+    {% for transaction in account.transactions %}
     <div class="flex flex-row w-full items-center gap-4">
         <i class="fa-solid fa-credit-card"></i>
         <div class="w-full">
