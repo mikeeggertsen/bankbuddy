@@ -14,6 +14,10 @@ class Bank(models.Model):
     name = models.CharField(max_length=100)
     external = models.BooleanField()
 
+    @property
+    def total_funds(self):
+        return Ledger.objects.all().aggregate(models.Sum('amount'))['amount__sum'] or Decimal(0)
+
     def __str__(self):
         return f'{self.name}'
 
@@ -260,3 +264,6 @@ class Ledger(models.Model):
                 message=message,
                 type=cls.CREDIT
             )
+    
+    def __str__(self):
+        return f"Account no: {self.account.account_no} type: {self.TRANSACTION_TYPES[self.type - 1][1]} amount: {self.amount}"
