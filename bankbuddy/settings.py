@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from celery.schedules import crontab
 
 load_dotenv()
 
@@ -151,6 +152,6 @@ INTERNAL_IPS = [
 CELERY_BEAT_SCHEDULE = {
     "schduled_task": {
         "task": "base.tasks.run_scheduled_transactions",
-        "schedule": 10.0,
+        "schedule": crontab(minute=0, hour=0) # Execute daily at midnight.
     }
 }
