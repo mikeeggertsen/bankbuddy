@@ -1,0 +1,89 @@
+{% extends 'main.html' %}
+
+{% block content %}
+   <div class="flex flex-col gap-4">
+    <h1 class="text-2xl font-semibold">Dashboard</h1>
+    <div class="bg-gradient-to-r from-[#485563] to-[#29323c] shadow-md rounded-lg h-32 w-full p-4">
+        <p class="text-[12px] text-white">Total funds</p>
+        <h2 class="text-3xl text-white font-semibold text-center mt-5">${{total_funds}}</h2>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+        <a href="/customers" class="shadow-md bg-gradient-to-r from-[#485563] to-[#29323c] rounded-lg h-32 w-full p-4">
+            <p class="text-[12px] text-white">Total customers</p>
+            <h2 class="text-xl text-white font-semibold text-center mt-5">{{total_customers}}</h2>
+        </a>
+        <div class="shadow-md bg-gradient-to-r from-[#485563] to-[#29323c] rounded-lg h-32 w-full p-4">
+            <p class="text-[12px] text-white">Total accounts</p>
+            <h2 class="text-xl text-white font-semibold text-center mt-5">{{total_accounts}}</h2>
+        </div>
+    </div>
+   <div>
+      <div class="flex flex-row justify-between items-center">
+        <h1 class="text-2xl font-semibold">Loans</h1>
+        <a href="/loans"><p class="text-[12px] text-gray-400">View all<i class="ml-2 fa-solid fa-chevron-right"></i></p></a>
+      </div>
+      <canvas class="mt-2" id="doughnut-chart"></canvas>
+   </div>
+   <div>
+    <h1 class="text-2xl font-semibold">Total transactions</h1>
+    <div class="flex flex-row gap-4 mt-2">
+        <a href="/dashboard/" id="chart-weekly" class="transaction-option relative text-sm font-normal" href="#">
+            <h5>Week</h5>
+        </a>
+        <a href="/dashboard/?q=monthly" id="chart-monthly" class="transaction-option relative text-sm font-normal" href="#">
+            <h5>Month</h5>
+        </a>
+        <a href="/dashboard/?q=yearly" id="chart-yearly" class="transaction-option relative text-sm font-normal" href="#">
+            <h5>Year</h5>
+        </a>
+    </div>
+    <canvas class="mt-2" id="line-chart"></canvas>
+   </div>
+   </div>
+   <script>
+    const doughnutConfig = {
+        type: 'doughnut',
+        data: {
+           labels: [
+             'Pending',
+             'Accepted',
+             'Rejected'
+           ],
+           datasets: [{
+             label: 'My First Dataset',
+             data: {{ loans|safe }},
+             backgroundColor: [
+               '#eab308',
+               '#22c55e',
+               '#ef4444'
+             ],
+             hoverOffset: 4
+           }],
+         }
+    }
+    const lineConfig = {
+        type: 'line',
+        data: {
+             labels: {{labels|safe}},
+             datasets: [{
+             data: {{transactions|safe}},
+             fill: false,
+             borderColor: 'rgb(98 83 202)',
+             tension: 0.1
+             }]
+        },
+        options: {
+            legend: {
+                display: false
+            },
+          responsive: true
+        }
+      };
+ 
+     window.onload = function() {
+       new Chart($('#doughnut-chart'), doughnutConfig);
+       new Chart($('#line-chart'), lineConfig);
+
+     };
+   </script>
+{% endblock %}
