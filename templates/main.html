@@ -7,11 +7,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% tailwind_css %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
-    <script src="{% static 'js/navbar.js' %}"></script>
-    <script src="{% static 'js/dashboard.js' %}"></script>
-    <script src="{% static 'js/transfer.js' %}"></script>
     <link
       href="{% static 'css/style.css' %}"
       rel="stylesheet"
@@ -30,16 +25,31 @@
       <div class="flex flex-col lg:flex-row h-full w-full items-center lg:items-start">
         {% include "header.html" %}
         {% if user.is_authenticated %}
-          {% include 'sidebar.html' %}
+          {% if user.is_staff %}
+            {% include 'sidebar.admin.html' %}
+          {% else %}
+            {% include 'sidebar.html' %}
+          {% endif %}
         {% endif %}
-        <div class="pb-20 lg:pt-8 px-6 max-w-3xl w-full h-full lg:mx-auto">
+        <div class="lg:pt-8 px-6 max-w-3xl w-full h-full lg:mx-auto overflow-y-scroll pb-20">
           {%block content%}
           {%endblock%}
         </div>
       </div>
     </div>
     {% if user.is_authenticated %}
-      {% include 'bottombar.html' %}
+      {% if user.is_staff %}
+        {% include 'bottombar.admin.html' %}
+      {% else %}
+        {% include 'bottombar.html' %}
+      {% endif %}
     {% endif %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
+    <script src="{% static 'js/navbar.js' %}"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script src="{% static 'js/transfer.js' %}"></script>
+    <script src="{% static 'js/customers.js' %}"></script>
   </body>
 </html>
