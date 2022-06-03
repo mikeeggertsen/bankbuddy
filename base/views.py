@@ -8,7 +8,7 @@ from authsystem.forms import CustomerForm
 from base.forms import AccountForm, LoanForm, LoanStatusForm, ProfileForm, RankForm, TransactionForm
 from django.urls import reverse
 from django.contrib.auth import update_session_auth_hash
-from base.models import Account, Ledger, Loan, Customer, Bank
+from base.models import Account, Ledger, Loan, Customer, Bank, ScheduledLedger
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models.functions import ExtractWeek, ExtractMonth, ExtractYear
 from django.db.models import Count
@@ -45,7 +45,7 @@ def dashboard(request):
             context["labels"] = labels
         return render(request, 'base/admin/dashboard.html', context)
     else:
-        account = Account.objects.filter(customer__id=request.user.id)
+        account = Account.objects.filter(customer__id=request.user.id).order_by("created_at")[:1].get()
         transaction_filter = request.GET.get('q', '')
         if account:
             context["transactions"] = account.transactions
@@ -155,6 +155,7 @@ def create_transaction(request):
             own_message = form.cleaned_data["own_message"]
             message = form.cleaned_data["message"]
             bank = form.cleaned_data["bank"]
+            scheduled_date = form.cleaned_data["scheduled_date"]
             to_account = get_object_or_404(Account, account_no=account_no)
 
             if account.customer.id != request.user.id:
@@ -172,15 +173,23 @@ def create_transaction(request):
                 )
 
                 return redirect(reverse('base:transfer'))
-
-            to_account = to_account[:1].get()
-            Ledger.make_bank_transaction(
-                credit_account=to_account.account_no,
-                debit_account=account.account_no,
-                amount=amount,
-                own_message=own_message,
-                message=message,
-            )
+            if scheduled_date:
+                ScheduledLedger.make_scheduled_transaction(
+                    credit_account=to_account,
+                    debit_account=account,
+                    amount=amount,
+                    own_message=own_message,
+                    message=message,
+                    scheduled_date=scheduled_date
+                )
+            else:
+                Ledger.make_bank_transaction(
+                    credit_account=to_account,
+                    debit_account=account,
+                    amount=amount,
+                    own_message=own_message,
+                    message=message,
+                )
             return redirect(reverse('base:transfer'))
         else:
             return render(request, "base/transaction_create.html", context)
@@ -257,7 +266,7 @@ def loan_payment(request, account_no):
             message = form.cleaned_data["message"]
 
             if loan:
-                Loan.make_bank_transaction(
+                Loan.make_loan_transaction(
                     credit_account=loan,
                     debit_account=account,
                     amount=amount,
