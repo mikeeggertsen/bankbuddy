@@ -35,5 +35,5 @@ class VerificationCode(models.Model):
             if not cls.objects.filter(code=code).exists():
                 cls.objects.create(user_id=user.pk, code=code)
                 message = f"BankBuddy: Your verification code is: {code}. Please don't reply"
-                send_sms(user.phone, message)
+                send_sms(message, user.phone)
                 break
