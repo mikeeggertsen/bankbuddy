@@ -2,9 +2,8 @@ from datetime import timedelta
 from django.utils import timezone
 import random
 from django.db import models
-
 from authsystem.api import send_sms
-
+from django.conf import settings
 class VerificationCode(models.Model):
     user_id = models.IntegerField()
     code = models.CharField(unique=True, max_length=5)
@@ -39,6 +38,10 @@ class VerificationCode(models.Model):
             code = random.randrange(10000, 99999)
             if not cls.objects.filter(code=code).exists():
                 cls.objects.create(user_id=user.pk, code=code)
-                message = f"BankBuddy: Your verification code is: {code}. Please don't reply"
-                send_sms(message, user.phone)
-                break
+                if settings.DEBUG:
+                    print('Verification Code', code)
+                    break
+                else:
+                    message = f"BankBuddy: Your verification code is: {code}. Please don't reply"
+                    send_sms(message, user.phone)
+                    break
