@@ -299,6 +299,12 @@ def employees(request):
     return render(request, "base/admin/employee_list.html", context)
 
 @user_passes_test(lambda u: u.is_superuser)
+def employee_details(request, id):
+    context = {}
+    context["employee"] = get_object_or_404(Employee, pk=id)
+    return render(request, "base/admin/employee_details.html", context)
+
+@user_passes_test(lambda u: u.is_superuser)
 def create_employee(request):
     context = {}
     if request.method == "POST":
