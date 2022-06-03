@@ -93,6 +93,7 @@ class Account(BaseAccount):
 
 
 class Loan(BaseAccount):
+    credit_account = models.ForeignKey(Account, on_delete=models.CASCADE)
     amount = models.IntegerField()
     status = models.PositiveSmallIntegerField(
         choices=STATUS_TYPES, default=PENDING)
@@ -127,6 +128,19 @@ class Loan(BaseAccount):
                 amount=-amount,
                 type=DEBIT,
                 message=own_message,
+            ).save()
+        return id
+
+    @classmethod
+    def approve_loan(cls, loan):
+        id = uuid.uuid4()
+        with transaction.atomic():
+            Ledger.objects.create(
+                transaction_id=id,
+                account=loan.credit_account,
+                amount=loan.amount,
+                type=CREDIT,
+                message=f"{loan.name} approved",
             ).save()
         return id
 

@@ -29,13 +29,16 @@
             </div>
           </a>
         {%empty%}
-        {% if customer %}
-            {% if customer.rank <= 1 %}
-                <p class="text-sm text-gray-400">You must be a Silver or Gold customer to take loans</p>
-            {%else%}
-                <p class="text-sm text-gray-400">You have no loans</p>
+            {% if user.is_staff %}
+                <p class="text-sm text-gray-400">Your bank has no loans</p>
             {% endif %}
-        {% endif %}
+            {% if customer %}
+                {% if customer.rank <= 1 %}
+                    <p class="text-sm text-gray-400">You must be a Silver or Gold customer to take loans</p>
+                {%else%}
+                    <p class="text-sm text-gray-400">You have no loans</p>
+                {% endif %}
+            {% endif %}
         {% endfor %}
         {% if customer %}
             {% if customer.rank > 1 %}

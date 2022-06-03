@@ -221,6 +221,8 @@ def loan_details(request, account_no):
         form = LoanStatusForm(request.POST)
         if form.is_valid():
             status = form.cleaned_data["status"]
+            if status == 2:
+                Loan.approve_loan(loan)
             loan.status = status
             loan.save()
     context["loan"] = loan
@@ -239,8 +241,10 @@ def apply_loan(request):
         form = LoanForm(request.user.id, request.POST)
         if form.is_valid():
             loan = form.save(commit=False)
+            credit_account = form.cleaned_data["accounts"]
             customer = get_object_or_404(Customer, pk=request.user.id)
             loan.customer = customer
+            loan.credit_account = credit_account
             loan.save()
             return redirect(reverse('base:loans'))
     context["form"] = LoanForm(request.user.id)

@@ -51,10 +51,10 @@
             <p class="text-sm text-gray-400">You have no payments</p>
         {% endif %}
        {% endfor %}
-       {% if loan.status == 2 and not user.is_staff %}
-        <a href="/loans/{{loan.account_no}}/payment" class="bg-primary absolute bottom-0 right-0 flex items-center justify-center rounded-full w-16 h-16 z-10 shadow-2xl">
-            <i class="fa-solid fa-credit-card text-3xl text-white"></i>
-        </a>
+       {% if loan.status == 2 and loan.percent_finish != 100 and not user.is_staff %}
+            <a href="/loans/{{loan.account_no}}/payment" class="bg-primary absolute bottom-0 right-0 flex items-center justify-center rounded-full w-16 h-16 z-10 shadow-2xl">
+                <i class="fa-solid fa-credit-card text-3xl text-white"></i>
+            </a>
        {% endif %}
     </div>
 {% endblock %}
