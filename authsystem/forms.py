@@ -1,19 +1,19 @@
 from django.forms import Form, CharField, EmailField, ModelForm, PasswordInput, TextInput, ValidationError
-from base.models import Customer, User
+from base.models import Customer
 
-class UserSignInForm(Form): 
+class SignInForm(Form): 
     email = EmailField(widget=TextInput(attrs={'placeholder': 'Email'}))
     password = CharField(widget=PasswordInput(attrs={"placeholder": "Password"}))
 
     def __init__(self, *args, **kwargs):
-            super(UserSignInForm, self).__init__(*args, **kwargs)
+            super(SignInForm, self).__init__(*args, **kwargs)
 
             for field in self.fields:
                 self.fields[field].widget.attrs.update({
-                    'class': 'border-0 rounded w-full bg-white shadow'
+                    'class': 'bb-input'
                 })
 
-class CustomerForm(ModelForm): 
+class SignUpForm(ModelForm): 
     first_name = CharField(widget=TextInput(attrs={"placeholder": "Firstname"}), required=True)
     last_name = CharField(widget=TextInput(attrs={"placeholder": "Lastname"}), required=True)
     class Meta:
@@ -21,34 +21,29 @@ class CustomerForm(ModelForm):
         fields = ["bank", "first_name", "last_name", "email", "password", "phone"]
         widgets = {
             "first_name": TextInput(attrs={
-                "class": "w-full bg-white border rounded-md shadow",
                 "placeholder": "Firstname",
             }),
             "last_name": TextInput(attrs={
-                "class": "w-full bg-white border rounded-md shadow",
                 "placeholder": "Lastname",
             }),
             "phone": TextInput(attrs={
-                "class": "w-full bg-white border rounded-md shadow",
                 "placeholder": "Phone no.",
             }),
             "email": TextInput(attrs={
-                "class": "w-full bg-white border rounded-md shadow",
                 "placeholder": "Email",
             }),
             "password": PasswordInput(attrs={
-                "class": "w-full bg-white border rounded-md shadow",
                 "placeholder": "Password",
             })
         }
 
     def __init__(self, *args, **kwargs):
-        super(CustomerForm, self).__init__(*args, **kwargs)
+        super(SignUpForm, self).__init__(*args, **kwargs)
         self.fields["bank"].empty_label = "Select a bank"
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-                'class': 'border-0 rounded w-full bg-white shadow'
+                'class': 'bb-input'
             })
 
 class VerifyForm(Form):
