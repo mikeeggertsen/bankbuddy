@@ -1,7 +1,7 @@
 from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout
-from authsystem.forms import CustomerForm, UserSignInForm, VerifyForm
+from authsystem.forms import SignUpForm, SignInForm, VerifyForm
 from authsystem.models import VerificationCode
 from base.models import Bank, Customer, User
 
@@ -12,7 +12,7 @@ def sign_in(request):
         return redirect(reverse("base:dashboard"))
 
     if request.method == "POST":
-        form = UserSignInForm(request.POST)
+        form = SignInForm(request.POST)
         context["form"] = form
         if form.is_valid():
             email = form.cleaned_data["email"]
@@ -25,7 +25,7 @@ def sign_in(request):
             else:
                 context["error"] = "Invalid email or password"
 
-    form = UserSignInForm()
+    form = SignInForm()
     context["form"] = form
     return render(request, "authsystem/sign_in.html", context)
 
@@ -42,7 +42,7 @@ def sign_up(request):
         return redirect(reverse("base:dashboard"))
 
     if request.method == "POST":
-        form = CustomerForm(request.POST)
+        form = SignUpForm(request.POST)
         context["form"] = form
         if form.is_valid():
             try:
@@ -52,7 +52,7 @@ def sign_up(request):
                 context["error"] = "Unable to create customer account. Please try again"
         return render(request, "authsystem/sign_up.html", context)
     
-    form = CustomerForm()
+    form = SignUpForm()
     form["bank"].queryset = Bank.objects.all()
     context["form"] = form
     return render(request, "authsystem/sign_up.html", context)

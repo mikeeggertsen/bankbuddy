@@ -4,11 +4,11 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
-from authsystem.forms import CustomerForm
-from base.forms import AccountForm, LoanForm, LoanStatusForm, ProfileForm, RankForm, TransactionForm
+from authsystem.forms import SignUpForm
+from base.forms import AccountForm, EmployeeForm, LoanForm, LoanStatusForm, ProfileForm, RankForm, TransactionForm
 from django.urls import reverse
 from django.contrib.auth import update_session_auth_hash
-from base.models import Account, Ledger, Loan, Customer, Bank, ScheduledLedger
+from base.models import Account, Employee, Ledger, Loan, Customer, Bank, ScheduledLedger
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models.functions import ExtractWeek, ExtractMonth, ExtractYear
 from django.db.models import Count
@@ -87,11 +87,11 @@ def customer_details(request, id):
 def create_customer(request):
     context = {}
     if request.method == "POST":
-        form = CustomerForm(request.POST)
+        form = SignUpForm(request.POST)
         if form.is_valid():
             Customer.objects.create_user(**form.cleaned_data)
         return redirect(reverse('base:customers'))
-    context["form"] = CustomerForm()
+    context["form"] = SignUpForm()
     return render(request, "base/admin/customer_create.html", context)
 
 
@@ -287,6 +287,35 @@ def loan_payment(request, account_no):
     form.fields["to_account"].initial = account_no
     context["form"] = form
     return render(request, "base/loan_payment.html", context)
+
+# EMPLOYEES
+@user_passes_test(lambda u: u.is_superuser)
+def employees(request):
+    context = {}
+    employees = Employee.objects.all().order_by("-created_at")
+    paginator = Paginator(employees, 10)
+    page_number = request.GET.get('page')
+    context["employees"] = paginator.get_page(page_number)
+    return render(request, "base/admin/employee_list.html", context)
+
+@user_passes_test(lambda u: u.is_superuser)
+def create_employee(request):
+    context = {}
+    if request.method == "POST":
+        form = EmployeeForm(request.POST)
+        if form.is_valid():
+            employee = form.save(commit=False)
+            employee.set_password(employee.password)
+            is_manager = form.cleaned_data["role"] == 2
+            if is_manager:
+                employee.is_superuser = True
+            else:
+                employee.is_staff = True
+            employee.save()
+            return redirect(reverse("base:employees"))
+        pass
+    context["form"] = EmployeeForm()
+    return render(request, "base/admin/employee_create.html", context)
 
 # PROFILE
 @login_required

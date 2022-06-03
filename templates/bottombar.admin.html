@@ -12,6 +12,11 @@
       <li class="menu-item">
         <a href="/loans"><i class="fa-solid fa-sack-dollar text-2xl"></i></a>
       </li>
+      {% if user.is_superuser %}
+        <li class="menu-item">
+          <a href="/employees/"><i class="fa-solid fa-user-tie text-2xl"></i></a>
+        </li>
+      {% endif %}
       <li class="menu-item">
         <a href="/profile/"><i class="fa-solid fa-user text-2xl"></i></a>
       </li>

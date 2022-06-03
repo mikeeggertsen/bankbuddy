@@ -16,6 +16,8 @@ urlpatterns = [
     path("loans/<int:account_no>", views.loan_details, name="loan"),
     path("loans/apply", views.apply_loan, name="apply_loan"),
     path("loans/<int:account_no>/payment", views.loan_payment, name="loan_payment"),
+    path("employees/", views.employees, name="employees"),
+    path("employees/new", views.create_employee, name="create_employee"),
     path("profile/", views.profile, name="profile"),
     path("transfer-request/", views.transfer_request, name="transfer_request")
 ]

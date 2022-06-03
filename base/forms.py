@@ -1,7 +1,7 @@
-from django.forms import CharField, ChoiceField, DateField, DateInput, DateTimeField,  ModelChoiceField, ModelForm, NumberInput, PasswordInput, TextInput, ValidationError
+from django.forms import CharField, ChoiceField, DateField, DateInput, EmailInput,  ModelChoiceField, ModelForm, NumberInput, PasswordInput, Select, TextInput, ValidationError
 
 from base.constants import ACCOUNT_TYPES
-from .models import Account, Ledger, Bank, Customer, Loan, User
+from .models import Account, Employee, Ledger, Bank, Customer, Loan, User
 from django.utils import timezone
 class AccountForm(ModelForm):
     type = ChoiceField(choices=ACCOUNT_TYPES)
@@ -180,3 +180,33 @@ class LoanStatusForm(ModelForm):
         super(LoanStatusForm, self).__init__(*args, **kwargs)
         self.fields['status'].widget.attrs={'onchange': 'form.submit()'}
         self.fields['status'].widget.attrs.update({'class': 'select-input'})
+
+class EmployeeForm(ModelForm):
+    class Meta:
+        model = Employee
+        fields = ["first_name", "last_name", "phone", "email", "password", "role"]
+        widgets = {
+            "first_name": TextInput(attrs={
+                "placeholder": "Firstname"
+            }),
+            "last_name": TextInput(attrs={
+                "placeholder": "Firstname"
+            }),
+            "phone": NumberInput(attrs={
+                "placeholder": "Phone"
+            }),
+            "email": EmailInput(attrs={
+                "placeholder": "Email"
+            }),
+            "password": PasswordInput(attrs={
+                "placeholder": "Password"
+            }),
+            "role": Select(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(EmployeeForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'bb-input'
+            })

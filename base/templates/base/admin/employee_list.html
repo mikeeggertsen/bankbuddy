@@ -1,0 +1,51 @@
+{% extends 'main.html' %}
+
+{% block content %}
+    <div class="flex flex-row justify-between items-center mb-4">
+        <h1 class="text-2xl font-semibold">Employees</h1>
+    <a href="/employees/new" class="text-[12px] bg-primary rounded-lg w-6 h-6 flex items-center justify-center"><i class="fa solid fa-plus text-white"></i></a>
+   </div>
+    {% for employee in employees %}
+    <a href="/employees/{{employee.id}}">
+        <div class="card rounded-lg shadow-md p-4 grid gap-2">
+            <div class="flex flex-row items-center justify-between">
+            <div class="flex flex-row items-center gap-2">
+                <i class="fa-solid fa-user text-white"></i>
+                <p class="text-white text-14">{{employee.first_name}} {{employee.last_name}} -   <small>{{employee.get_role_display}}</small></p>
+            </div>
+                <p id="rank" class="text-white text-[12px]">{{employee.get_rank_display}}</p>
+            </div>
+            <div class="flex flex-col">
+                <p class="text-white text-[12px]">Email: {{employee.email}}</p>
+                <p class="text-white text-[12px]">Phone no:{{employee.phone}}</p>
+            </div>
+            <div class="flex flex-col justify-end items-end">
+                <p class="text-white text-[12px]">Joined at: {{employee.created_at|date:"d M Y"}}</p>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    {% if customers.has_previous %}
+        <div class="absolute left-6 bottom-20">
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page=1">&laquo; first</a>
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ customers.previous_page_number }}">prev</a>
+        </div>
+    {% endif %}
+
+    <div class="absolute bottom-20 left-1/2 -translate-x-1/2">
+        <p class="text-[12px]">Page {{ customers.number }} of {{ customers.paginator.num_pages }}.</p>
+    </div>
+
+    {% if customers.has_next %}
+        <div class="absolute right-6 bottom-20">
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ customers.next_page_number }}">next</a>
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ customers.paginator.num_pages }}">last &raquo;</a>
+        </div>
+    {% endif %}
+    {% if customers.has_next %}
+        <div class="absolute right-6 bottom-20">
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ customers.next_page_number }}">next</a>
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ customers.paginator.num_pages }}">last &raquo;</a>
+        </div>
+    {% endif %}
+{% endblock %}
