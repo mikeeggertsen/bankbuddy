@@ -9,11 +9,16 @@ class VerificationCode(models.Model):
     user_id = models.IntegerField()
     code = models.CharField(unique=True, max_length=5)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(default=timezone.now() + timedelta(minutes=15))
+    expires_at = models.DateTimeField()
 
     class Meta:
         db_table = 'verification_codes'
-    
+
+    def save(self, *args, **kwargs):
+        expires_at=timezone.now() + timedelta(minutes=15)
+        self.expires_at = expires_at
+        super(VerificationCode, self).save(*args, **kwargs)
+
     def __str__(self):
         return f'{self.code} - created at {self.created_at}'
 
