@@ -4,7 +4,7 @@ import uuid
 import requests
 from django.db import models, transaction
 from django.contrib.auth.models import AbstractUser
-from base.constants import ACCOUNT_TYPES, BASIC, CREDIT, DEBIT, DEPARTMENTS, PENDING, RANKS, START_ACCOUNT_NO, STATUS_TYPES, TRANSACTION_TYPES
+from base.constants import ACCOUNT_TYPES, BASIC, CREDIT, DEBIT, PENDING, RANKS, ROLES, START_ACCOUNT_NO, STATUS_TYPES, TRANSACTION_TYPES
 
 from base.managers import UserManager
 
@@ -51,7 +51,7 @@ class Customer(User):
 
 
 class Employee(User):
-    department = models.PositiveSmallIntegerField(choices=DEPARTMENTS)
+    role = models.PositiveSmallIntegerField(choices=ROLES)
 
     class Meta:
         db_table = 'employees'

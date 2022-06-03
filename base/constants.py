@@ -11,7 +11,7 @@ RANKS = [
 # EMPLOYEES
 SUPPORT = 1
 MANAGER = 2
-DEPARTMENTS = [
+ROLES = [
     (SUPPORT, 'Support'),
     (MANAGER, 'Manager'),
 ]
