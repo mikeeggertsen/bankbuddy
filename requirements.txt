@@ -35,6 +35,7 @@ platformdirs==2.5.1
 poyo==0.5.0
 prompt-toolkit==3.0.29
 psutil==5.9.0
+PyJWT==2.4.0
 pyte==0.8.1
 python-crontab==2.6.0
 python-dateutil==2.8.2
@@ -47,6 +48,7 @@ six==1.16.0
 sqlparse==0.4.2
 text-unidecode==1.3
 thefuck==3.32
+twilio==7.9.2
 urllib3==1.26.9
 vine==5.0.0
 virtualenv==20.13.2
