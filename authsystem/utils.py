@@ -1,5 +1,6 @@
 import os
 from twilio.rest import Client 
+from django.core.mail import send_mail
  
 account_sid = 'AC3421f05af30e4e64561f6f8f19e785b1' 
 auth_token = os.environ["SMS_API_TOKEN"]
@@ -11,4 +12,14 @@ def send_sms(msg_content, phone):
         body=msg_content,      
         to=f"+45{str(phone)}" 
 ) 
+
+
+def send_email(subject, message, recepient):
+    send_mail(
+    subject,
+    message,
+    'kontakt@mikeeggertsen.com',
+    [recepient],
+    fail_silently=False,
+)
  
