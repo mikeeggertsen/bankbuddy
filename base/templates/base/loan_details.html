@@ -35,22 +35,24 @@
            </form>
            {% endif %}
         </div>
-       {% for transaction in loan.transactions  %}
-        <div class="flex flex-row w-full items-center gap-4">
-            <i class="fa-solid fa-credit-card"></i>
-            <div class="w-full">
-                <h4 class="text-sm font-semibold">{{transaction.message}}</h4>
-                <p class="text-[12px] text-gray-400">{{transaction.created_at|date:"d M Y"}}</p>
-            </div>
-            <p class="text-sm font-semibold text-red-600">$-{{transaction.amount}}</p>
+        <div class="flex flex-col gap-4 mt-4">
+            {% for transaction in loan.transactions  %}
+                <div class="flex flex-row w-full items-center gap-4">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <div class="w-full">
+                        <h4 class="text-sm font-semibold">{{transaction.message}}</h4>
+                        <p class="text-[12px] text-gray-400">{{transaction.created_at|date:"d M Y"}}</p>
+                    </div>
+                    <p class="text-sm font-semibold text-red-600">$-{{transaction.amount}}</p>
+                </div>
+            {%empty%}
+                {% if user.is_staff %}
+                    <p class="text-sm text-gray-400">Customer has no payments</p>
+                {% else %}
+                    <p class="text-sm text-gray-400">You have no payments</p>
+                {% endif %}
+            {% endfor %}
         </div>
-       {%empty%}
-        {% if user.is_staff %}
-            <p class="text-sm text-gray-400">Customer has no payments</p>
-        {% else %}
-            <p class="text-sm text-gray-400">You have no payments</p>
-        {% endif %}
-       {% endfor %}
        {% if loan.status == 2 and loan.percent_finish != 100 and not user.is_staff %}
             <a href="/loans/{{loan.account_no}}/payment" class="bg-primary absolute bottom-0 right-0 flex items-center justify-center rounded-full w-16 h-16 z-10 shadow-2xl">
                 <i class="fa-solid fa-credit-card text-3xl text-white"></i>

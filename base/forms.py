@@ -52,6 +52,7 @@ class TransactionForm(ModelForm):
             "type": "date", 
         })
         self.fields["account"].empty_label = "Select an account"
+        self.fields["account"].required = True
         self.fields["bank"].empty_label = "Select a bank"
 
         for field in self.fields:
@@ -160,6 +161,18 @@ class LoanForm(ModelForm):
             self.fields[field].widget.attrs.update({
                'class': 'bb-input'
             })
+        
+    def clean(self):
+        cleaned_data = super(LoanForm, self).clean()
+        account = cleaned_data["accounts"]
+        amount = cleaned_data["amount"]
+        if account.balance < amount:
+            raise ValidationError({"account": "Account has inefficient funds"})
+        if amount <= 0:
+            raise ValidationError(
+                {"amount": "Amount must be a greater than $0"})
+        return cleaned_data
+
 
 class RankForm(ModelForm):
     class Meta:
