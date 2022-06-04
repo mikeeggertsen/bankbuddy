@@ -98,6 +98,3 @@ def resend_sms(request):
             VerificationCode.send_code(user)
       
     return redirect(reverse("authsystem:verify"))
-
-def password_reset(request):
-    pass
