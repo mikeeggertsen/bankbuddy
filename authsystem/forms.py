@@ -1,4 +1,4 @@
-from django.forms import Form, CharField, EmailField, ModelForm, PasswordInput, TextInput, ValidationError
+from django.forms import EmailField, Form, CharField, ModelForm, PasswordInput, TextInput
 from base.models import Customer
 
 class SignInForm(Form): 
@@ -6,16 +6,12 @@ class SignInForm(Form):
     password = CharField(widget=PasswordInput(attrs={"placeholder": "Password"}))
 
     def __init__(self, *args, **kwargs):
-            super(SignInForm, self).__init__(*args, **kwargs)
+        super(SignInForm, self).__init__(*args, **kwargs)
 
-            for field in self.fields:
-                self.fields[field].widget.attrs.update({
-                    'class': 'bb-input'
-                })
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({ 'class': 'bb-input' })
 
 class SignUpForm(ModelForm): 
-    first_name = CharField(widget=TextInput(attrs={"placeholder": "Firstname"}), required=True)
-    last_name = CharField(widget=TextInput(attrs={"placeholder": "Lastname"}), required=True)
     class Meta:
         model = Customer
         fields = ["bank", "first_name", "last_name", "email", "password", "phone"]
@@ -51,8 +47,4 @@ class VerifyForm(Form):
 
     def __init__(self, *args, **kwargs):
         super(VerifyForm, self).__init__(*args, **kwargs)
-
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({
-                'class': 'border-0 rounded w-full bg-white shadow'
-            })
+        self.fields["code"].widget.attrs.update({ 'class': 'bb-input' })
