@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.utils import timezone
 import random
 from django.db import models
-from authsystem.api import send_sms
+from authsystem.utils import send_sms
 from django.conf import settings
 class VerificationCode(models.Model):
     user_id = models.IntegerField()
