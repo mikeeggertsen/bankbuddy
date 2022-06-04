@@ -158,7 +158,7 @@ class Loan(BaseAccount):
 
     @property
     def transactions(self):
-        return Ledger.objects.filter(loan=self)
+        return Ledger.objects.filter(loan=self).order_by("-created_at")
 
 class BaseLedger(models.Model):
     transaction_id = models.CharField(max_length=50)
