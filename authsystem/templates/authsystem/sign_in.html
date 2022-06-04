@@ -20,11 +20,10 @@
                {% if error %} 
                   <p class="text-red-500 text-[12px]">{{error}}</p>
                {% endif %}
-               <p class="text-sm text-primary">Forgot password</p>
+               <a href="/reset_password" class="text-sm text-primary">Forgot password</a>
                <button type="submit" class="w-full bg-primary text-white py-2 rounded">Sign in</button>
             </form>
             <p class="text-gray-500 text-sm">Don't have an account yet? <a class="text-primary" href="/signup">Sign up</a></p>
          </div>
       </div>
-      <div class="hidden h-full lg:flex lg:flex-col lg:w-1/2"></div>
 {% endblock content %}
