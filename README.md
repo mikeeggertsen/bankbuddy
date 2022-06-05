@@ -1,3 +1,9 @@
+### TESTS
+
+To run all tests, run the following command:
+
+- python3 manage.py test --debug-mode
+
 ### CELERY
 
 To run scheduled payment you will need to run both the Celery worker and Celery beat, which send the scheduled tasks to the worker to be processed.
