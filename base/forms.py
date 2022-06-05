@@ -3,13 +3,16 @@ from django.forms import CharField, ChoiceField, DateField, DateInput, EmailInpu
 from base.constants import ACCOUNT_TYPES
 from .models import Account, Employee, Ledger, Bank, Customer, Loan, User
 from django.utils import timezone
+
+
 class AccountForm(ModelForm):
     type = ChoiceField(choices=ACCOUNT_TYPES)
 
     def __init__(self, is_staff, *args, **kwargs):
         super(AccountForm, self).__init__(*args, **kwargs)
         if is_staff:
-            self.fields["customer"] = ModelChoiceField(queryset=Customer.objects.all(), empty_label="Choose customer")
+            self.fields["customer"] = ModelChoiceField(
+                queryset=Customer.objects.all(), empty_label="Choose customer")
         for field in self.fields:
             self.fields[field].widget.attrs.update({
                 'class': 'bb-input'
@@ -25,8 +28,10 @@ class AccountForm(ModelForm):
             }),
         }
 
+
 class TransactionForm(ModelForm):
-    bank = ModelChoiceField(queryset=Bank.objects.all(), required=False)
+    bank = ModelChoiceField(queryset=Bank.objects.filter(
+        external=True), required=False)
     to_account = CharField()
     own_message = CharField(max_length=255)
     scheduled_date = DateField(required=False)
@@ -49,7 +54,7 @@ class TransactionForm(ModelForm):
         self.fields["to_account"].widget.attrs['placeholder'] = "Account no."
         self.fields["scheduled_date"].widget = DateInput(attrs={
             "placeholder": "Scheduled date",
-            "type": "date", 
+            "type": "date",
         })
         self.fields["account"].empty_label = "Select an account"
         self.fields["account"].required = True
@@ -159,9 +164,9 @@ class LoanForm(ModelForm):
 
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-               'class': 'bb-input'
+                'class': 'bb-input'
             })
-        
+
     def clean(self):
         cleaned_data = super(LoanForm, self).clean()
         amount = cleaned_data["amount"]
@@ -175,11 +180,12 @@ class RankForm(ModelForm):
     class Meta:
         model = Customer
         fields = ["rank"]
-    
+
     def __init__(self, *args, **kwargs):
         super(RankForm, self).__init__(*args, **kwargs)
-        self.fields['rank'].widget.attrs={'onchange': 'form.submit()'}
+        self.fields['rank'].widget.attrs = {'onchange': 'form.submit()'}
         self.fields['rank'].widget.attrs.update({'class': 'select-input'})
+
 
 class LoanStatusForm(ModelForm):
     class Meta:
@@ -188,13 +194,15 @@ class LoanStatusForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(LoanStatusForm, self).__init__(*args, **kwargs)
-        self.fields['status'].widget.attrs={'onchange': 'form.submit()'}
+        self.fields['status'].widget.attrs = {'onchange': 'form.submit()'}
         self.fields['status'].widget.attrs.update({'class': 'select-input'})
+
 
 class EmployeeForm(ModelForm):
     class Meta:
         model = Employee
-        fields = ["first_name", "last_name", "phone", "email", "password", "role"]
+        fields = ["first_name", "last_name",
+                  "phone", "email", "password", "role"]
         widgets = {
             "first_name": TextInput(attrs={
                 "placeholder": "Firstname"

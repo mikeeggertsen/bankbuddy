@@ -138,3 +138,7 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 /.vscode
+
+#Celery
+celerybeat-schedule
+/share
