@@ -23,7 +23,7 @@ class VerificationCode(models.Model):
 
     @classmethod
     def verify(cls, code):
-        token = cls.objects.filter(code=code).get()
+        token = cls.objects.get(code=code)
         if token.expires_at < timezone.now():
             raise Exception("Verification code has expired, re-send sms to try again")
         if token:

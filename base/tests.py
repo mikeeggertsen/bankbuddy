@@ -12,7 +12,7 @@ class ViewTestCase(TestCase):
             name="Test Bank",
             external=False
         )
-        self.user = Customer.objects.create(
+        self.user = Customer.objects.create_user(
             email="jane@doe.dk",
             first_name="Jane",
             last_name="Doe",
