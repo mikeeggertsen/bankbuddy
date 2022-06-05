@@ -164,10 +164,7 @@ class LoanForm(ModelForm):
         
     def clean(self):
         cleaned_data = super(LoanForm, self).clean()
-        account = cleaned_data["accounts"]
         amount = cleaned_data["amount"]
-        if account.balance < amount:
-            raise ValidationError({"account": "Account has inefficient funds"})
         if amount <= 0:
             raise ValidationError(
                 {"amount": "Amount must be a greater than $0"})
