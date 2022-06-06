@@ -1,0 +1,23 @@
+<div id="container" class="absolute bottom-0 left-1/2 -translate-x-1/2 bg-primary w-2/3 py-2 px-6 z-10 rounded-lg transition-all duration-500">
+    <p class="text-white text-center" id="toast_msg"></p>
+</div>
+<script>
+    const socket = new WebSocket(`ws://${window.location.host}/{{user.id}}/`)
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const container = document.getElementById("container")
+        container.classList.toggle("bottom-24")
+        container.classList.toggle("bottom-0")
+        const msg = document.getElementById("toast_msg")
+        msg.innerText = data.message
+        setTimeout(() => {
+            container.classList.toggle("bottom-24")
+            container.classList.toggle("bottom-0")
+            msg.innerText = ""
+        }, 3000)
+    };
+
+    socket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+</script>
