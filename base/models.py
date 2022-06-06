@@ -25,7 +25,7 @@ class Bank(models.Model):
 class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True)
-    phone = models.CharField(blank=False, null=False, unique=True, max_length=15)
+    phone = models.CharField(blank=False, null=False, max_length=15)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -55,6 +55,7 @@ class Employee(User):
 
     class Meta:
         db_table = 'employees'
+
 
 class BaseAccount(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
@@ -160,6 +161,7 @@ class Loan(BaseAccount):
     def transactions(self):
         return Ledger.objects.filter(loan=self).order_by("-created_at")
 
+
 class BaseLedger(models.Model):
     transaction_id = models.CharField(max_length=50)
     account = models.ForeignKey(
@@ -171,13 +173,15 @@ class BaseLedger(models.Model):
     message = models.CharField(max_length=100)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         abstract = True
+
+
 class Ledger(BaseLedger):
 
     class Meta:
         db_table = "ledger"
-
 
     @classmethod
     def make_bank_transaction(cls, credit_account, debit_account, amount, own_message, message):
@@ -241,12 +245,14 @@ class Ledger(BaseLedger):
                 message=message,
                 type=CREDIT
             )
-    
+
     def __str__(self):
         return f"Account: {self.account} Loan: {self.loan} type: {TRANSACTION_TYPES[self.type - 1][1]} amount: {self.amount}"
 
+
 class ScheduledLedger(BaseLedger):
     scheduled_date = models.DateField()
+
     class Meta:
         db_table = "scheduled_transactions"
 

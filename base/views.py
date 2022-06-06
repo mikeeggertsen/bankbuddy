@@ -15,11 +15,14 @@ from django.db.models.functions import ExtractWeek, ExtractMonth, ExtractYear
 from django.db.models import Count
 from django.core.paginator import Paginator
 
+
 @login_required
 def index(request):
     return redirect(reverse('base:dashboard'))
 
 # DASHBOARD
+
+
 @login_required
 def dashboard(request):
     context = {}
@@ -70,6 +73,8 @@ def dashboard(request):
         return render(request, 'base/dashboard.html', context)
 
 # CUSTOMERS
+
+
 @staff_member_required
 def customers(request):
     context = {}
@@ -236,11 +241,11 @@ def loans(request):
 @user_passes_test(lambda u: u.is_staff or get_object_or_404(Customer, pk=u.id).rank > 1)
 def loan_details(request, account_no):
     context = {}
-    employee = Employee.objects.filter(email=request.user.email)[:1].get()
+    employee = Employee.objects.get(email=request.user.email)
     context["employee"] = employee
     loan = get_object_or_404(Loan, account_no=account_no)
     if request.method == "POST":
-        if employee.role == MANAGER:
+        if employee[0].role == MANAGER:
             form = LoanStatusForm(request.POST)
             if form.is_valid():
                 status = form.cleaned_data["status"]
@@ -375,7 +380,7 @@ def profile(request):
     if request.user.is_staff:
         user = get_object_or_404(Employee, pk=id)
     else:
-        user = get_object_or_404(Customer, pk=id) 
+        user = get_object_or_404(Customer, pk=id)
     context["form"] = ProfileForm(instance=user)
     return render(request, 'base/profile_details.html', context)
 
