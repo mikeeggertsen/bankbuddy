@@ -175,7 +175,7 @@ def create_transaction(request):
             message = form.cleaned_data["message"]
             bank = form.cleaned_data["bank"]
             scheduled_date = form.cleaned_data["scheduled_date"]
-            to_account = Account.objects.filter(account_no=account_no)
+            to_account = Account.objects.get(account_no=account_no)
 
             if account.customer.id != request.user.id:
                 print("Not your account!!")  # TODO show error to user
@@ -236,7 +236,7 @@ def loans(request):
 @user_passes_test(lambda u: u.is_staff or get_object_or_404(Customer, pk=u.id).rank > 1)
 def loan_details(request, account_no):
     context = {}
-    employee = Employee.objects.filter(email=request.user.email)
+    employee = Employee.objects.filter(email=request.user.email)[:1].get()
     context["employee"] = employee
     loan = get_object_or_404(Loan, account_no=account_no)
     if request.method == "POST":
