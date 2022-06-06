@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from celery.schedules import crontab
 
 load_dotenv()
 
@@ -47,7 +46,7 @@ INSTALLED_APPS = [
     'tailwind',
     'theme',
     'django_browser_reload',
-    'django_celery_beat',
+    'django_crontab',
     'base.apps.BaseConfig',
     'authsystem.apps.AuthsystemConfig',
 ]
@@ -150,12 +149,9 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-CELERY_BEAT_SCHEDULE = {
-    "schduled_task": {
-        "task": "base.tasks.run_scheduled_transactions",
-        "schedule": crontab(minute=0, hour=0)  # Execute daily at midnight.
-    }
-}
+CRONJOBS = [
+    ('0 0 * * *', 'base.tasks.run_scheduled_transactions')  # runs every day at 00:00
+]
 
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
