@@ -208,7 +208,7 @@ class EmployeeForm(ModelForm):
                 "placeholder": "Firstname"
             }),
             "last_name": TextInput(attrs={
-                "placeholder": "Firstname"
+                "placeholder": "Lastname"
             }),
             "phone": NumberInput(attrs={
                 "placeholder": "Phone"
