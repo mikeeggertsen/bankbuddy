@@ -38,6 +38,7 @@
       </div>
     </div>
     {% if user.is_authenticated %}
+      {% include 'toast.html' %}
       {% if user.is_staff %}
         {% include 'bottombar.admin.html' %}
       {% else %}

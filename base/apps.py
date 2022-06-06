@@ -6,4 +6,4 @@ class BaseConfig(AppConfig):
     name = 'base'
 
     def ready(self):
-        from .signals import send_new_loan_mail
+        import base.signals
