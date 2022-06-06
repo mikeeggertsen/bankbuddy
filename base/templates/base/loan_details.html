@@ -28,7 +28,7 @@
 
         <div class="flex flex-row justify-between items-center my-2">
             <h3 class="text-md font-semibold">Payments</h3>
-           {% if user.is_staff %}
+           {% if employee.role == 2 %}
            <form method="POST">
                {% csrf_token %}
                 {{form.status}}
@@ -46,14 +46,14 @@
                     <p class="text-sm font-semibold text-red-600">$-{{transaction.amount}}</p>
                 </div>
             {%empty%}
-                {% if user.is_staff %}
+                {% if employee.is_staff %}
                     <p class="text-sm text-gray-400">Customer has no payments</p>
                 {% else %}
                     <p class="text-sm text-gray-400">You have no payments</p>
                 {% endif %}
             {% endfor %}
         </div>
-       {% if loan.status == 2 and loan.percent_finish != 100 and not user.is_staff %}
+       {% if loan.status == 2 and loan.percent_finish != 100 and not employee.is_staff %}
             <a href="/loans/{{loan.account_no}}/payment" class="bg-primary absolute bottom-0 right-0 flex items-center justify-center rounded-full w-16 h-16 z-10 shadow-2xl">
                 <i class="fa-solid fa-credit-card text-3xl text-white"></i>
             </a>

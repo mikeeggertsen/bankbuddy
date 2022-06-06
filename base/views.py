@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from authsystem.forms import SignUpForm
+from base.constants import MANAGER
 from base.forms import AccountForm, EmployeeForm, LoanForm, LoanStatusForm, ProfileForm, RankForm, TransactionForm
 from django.urls import reverse
 from django.contrib.auth import update_session_auth_hash
@@ -126,12 +127,9 @@ def account_details(request, account_no):
 @login_required
 def create_account(request):
     context = {}
-    form = AccountForm(request.user.is_staff)
-    context["form"] = form
     if request.method == "POST":
         form = AccountForm(request.user.is_staff, request.POST)
         if form.is_valid():
-            print(form.cleaned_data)
             account = form.save(commit=False)
             type = form.cleaned_data["type"]
             account.type = type
@@ -141,7 +139,8 @@ def create_account(request):
                 account.customer = get_object_or_404(Customer, pk=request.user.id)
             account.save()
             return redirect(reverse('base:accounts'))
-
+    form = AccountForm(request.user.is_staff)
+    context["form"] = form
     return render(request, "base/account_create.html", context)
 
 # TRANSACTIONS
@@ -164,7 +163,6 @@ def create_transaction(request):
 
             if account.customer.id != request.user.id:
                 print("Not your account!!")  # TODO show error to user
-                return redirect(reverse('base:transfer'))
 
             if bank is not None:
                 Ledger.make_external_transfer(
@@ -176,7 +174,6 @@ def create_transaction(request):
                     external_bank_id=bank.id
                 )
 
-                return redirect(reverse('base:transfer'))
             if scheduled_date:
                 ScheduledLedger.make_scheduled_transaction(
                     credit_account=to_account,
@@ -220,15 +217,18 @@ def loans(request):
 @user_passes_test(lambda u: u.is_staff or get_object_or_404(Customer, pk=u.id).rank > 1)
 def loan_details(request, account_no):
     context = {}
+    employee = Employee.objects.filter(email=request.user.email)
+    context["employee"] = employee
     loan = get_object_or_404(Loan, account_no=account_no)
     if request.method == "POST":
-        form = LoanStatusForm(request.POST)
-        if form.is_valid():
-            status = form.cleaned_data["status"]
-            if status == 2:
-                Loan.approve_loan(loan)
-            loan.status = status
-            loan.save()
+        if employee.role == MANAGER:
+            form = LoanStatusForm(request.POST)
+            if form.is_valid():
+                status = form.cleaned_data["status"]
+                if status == 2:
+                    Loan.approve_loan(loan)
+                loan.status = status
+                loan.save()
     context["loan"] = loan
     if request.user.is_staff:
         form = LoanStatusForm()
