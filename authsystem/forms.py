@@ -30,12 +30,12 @@ class SignUpForm(ModelForm):
             }),
             "password": PasswordInput(attrs={
                 "placeholder": "Password",
-            })
+            }),
         }
 
     def __init__(self, *args, **kwargs):
         super(SignUpForm, self).__init__(*args, **kwargs)
-        self.initial["bank"] = Bank.objects.filter(external=False)
+        self.initial["bank"] = Bank.objects.get(external=False)
         
         for field in self.fields:
             self.fields[field].widget.attrs.update({
