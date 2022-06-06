@@ -69,18 +69,6 @@ class TransactionForm(ModelForm):
         if is_loan:
             self.fields["to_account"].widget.attrs["readonly"] = True
 
-    def clean_to_account(self):
-        cleaned_data = super(TransactionForm, self).clean()
-        to_account = cleaned_data["to_account"]
-
-        # TODO ADD EXTERNAL BANK ACCOUNT CHECK
-        if self.is_loan and not Loan.objects.filter(account_no=to_account).exists():
-            raise ValidationError("No account exists with this account no.")
-
-        if not self.is_loan and not Account.objects.filter(account_no=to_account).exists():
-            raise ValidationError("No account exists with this account no.")
-        return to_account
-
     def clean_scheduled_date(self):
         cleaned_data = super(TransactionForm, self).clean()
         scheduled_date = cleaned_data["scheduled_date"]
@@ -93,11 +81,23 @@ class TransactionForm(ModelForm):
         cleaned_data = super(TransactionForm, self).clean()
         account = cleaned_data["account"]
         amount = cleaned_data["amount"]
+        bank = cleaned_data["bank"]
+        to_account = cleaned_data["to_account"]
         if account.balance < amount:
             raise ValidationError({"account": "Account has inefficient funds"})
         if amount <= 0:
             raise ValidationError(
                 {"amount": "Amount must be a greater than $0"})
+
+        if bank is None:
+            if self.is_loan and not Loan.objects.filter(account_no=to_account).exists():
+                raise ValidationError(
+                    "No account exists with this account no.")
+
+            if not self.is_loan and not Account.objects.filter(account_no=to_account).exists():
+                raise ValidationError(
+                    "No account exists with this account no.")
+
         return cleaned_data
 
 

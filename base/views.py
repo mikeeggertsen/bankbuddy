@@ -16,6 +16,8 @@ from django.db.models import Count
 from django.core.paginator import Paginator
 
 # DASHBOARD
+
+
 @login_required
 def dashboard(request):
     context = {}
@@ -31,12 +33,15 @@ def dashboard(request):
         filter = request.GET.get('q', '')
         data_set = None
         if filter == "monthly":
-            data_set = Ledger.objects.annotate(label=ExtractMonth("created_at")).values('label').annotate(count=Count('id'))
+            data_set = Ledger.objects.annotate(label=ExtractMonth(
+                "created_at")).values('label').annotate(count=Count('id'))
         elif filter == "yearly":
-            data_set = Ledger.objects.annotate(label=ExtractYear("created_at")).values('label').annotate(count=Count('id'))
+            data_set = Ledger.objects.annotate(label=ExtractYear(
+                "created_at")).values('label').annotate(count=Count('id'))
         else:
-            data_set = Ledger.objects.annotate(label=ExtractWeek("created_at")).values('label').annotate(count=Count('id'))
-        
+            data_set = Ledger.objects.annotate(label=ExtractWeek(
+                "created_at")).values('label').annotate(count=Count('id'))
+
         transactions = []
         labels = []
         for record in data_set:
@@ -48,7 +53,8 @@ def dashboard(request):
     else:
         account = None
         try:
-            account = Account.objects.filter(customer__id=request.user.id).order_by("created_at")[:1].get()
+            account = Account.objects.filter(
+                customer__id=request.user.id).order_by("created_at")[:1].get()
         except Exception:
             pass
         transaction_filter = request.GET.get('q', '')
@@ -61,7 +67,9 @@ def dashboard(request):
             context['account'] = account
         return render(request, 'base/dashboard.html', context)
 
-#CUSTOMERS
+# CUSTOMERS
+
+
 @staff_member_required
 def customers(request):
     context = {}
@@ -70,6 +78,7 @@ def customers(request):
     page_number = request.GET.get('page')
     context["customers"] = paginator.get_page(page_number)
     return render(request, "base/admin/customer_list.html", context)
+
 
 @staff_member_required
 def customer_details(request, id):
@@ -87,6 +96,7 @@ def customer_details(request, id):
     context["customer"] = customer
     context["accounts"] = Account.objects.filter(customer__id=id)
     return render(request, "base/admin/customer_details.html", context)
+
 
 @staff_member_required
 def create_customer(request):
@@ -106,8 +116,9 @@ def accounts(request):
     context = {}
     if request.user.is_staff:
         context['accounts'] = Account.objects.all().order_by("-created_at")
-    else: 
-        context['accounts'] = Account.objects.filter(customer__id=request.user.id).order_by("-created_at")
+    else:
+        context['accounts'] = Account.objects.filter(
+            customer__id=request.user.id).order_by("-created_at")
     return render(request, 'base/account_list.html', context)
 
 
@@ -116,9 +127,11 @@ def account_details(request, account_no):
     context = {}
     try:
         if request.user.is_staff:
-            context["account"] = get_object_or_404(Account, account_no=account_no)
-        else: 
-            context["account"] = get_object_or_404(Account, customer__id=request.user.id, account_no=account_no)
+            context["account"] = get_object_or_404(
+                Account, account_no=account_no)
+        else:
+            context["account"] = get_object_or_404(
+                Account, customer__id=request.user.id, account_no=account_no)
     except Http404:
         return redirect(reverse('base:accounts'))
     return render(request, 'base/account_details.html', context)
@@ -136,7 +149,8 @@ def create_account(request):
             if request.user.is_staff:
                 account.customer = form.cleaned_data["customer"]
             else:
-                account.customer = get_object_or_404(Customer, pk=request.user.id)
+                account.customer = get_object_or_404(
+                    Customer, pk=request.user.id)
             account.save()
             return redirect(reverse('base:accounts'))
     form = AccountForm(request.user.is_staff)
@@ -144,6 +158,8 @@ def create_account(request):
     return render(request, "base/account_create.html", context)
 
 # TRANSACTIONS
+
+
 @login_required
 def create_transaction(request):
     context = {}
@@ -159,7 +175,7 @@ def create_transaction(request):
             message = form.cleaned_data["message"]
             bank = form.cleaned_data["bank"]
             scheduled_date = form.cleaned_data["scheduled_date"]
-            to_account = get_object_or_404(Account, account_no=account_no)
+            to_account = Account.objects.filter(account_no=account_no)
 
             if account.customer.id != request.user.id:
                 print("Not your account!!")  # TODO show error to user
@@ -173,6 +189,7 @@ def create_transaction(request):
                     message=message,
                     external_bank_id=bank.id
                 )
+                return redirect(reverse('base:transfer'))
 
             if scheduled_date:
                 ScheduledLedger.make_scheduled_transaction(
@@ -195,13 +212,15 @@ def create_transaction(request):
         else:
             return render(request, "base/transaction_create.html", context)
 
-
     form = TransactionForm(is_loan)
-    form.fields["account"].queryset = Account.objects.filter(customer__id=request.user.id)
+    form.fields["account"].queryset = Account.objects.filter(
+        customer__id=request.user.id)
     context["form"] = form
     return render(request, "base/transaction_create.html", context)
 
 # LOANS
+
+
 @login_required
 def loans(request):
     context = {}
@@ -293,6 +312,8 @@ def loan_payment(request, account_no):
     return render(request, "base/loan_payment.html", context)
 
 # EMPLOYEES
+
+
 @user_passes_test(lambda u: u.is_superuser)
 def employees(request):
     context = {}
@@ -302,11 +323,13 @@ def employees(request):
     context["employees"] = paginator.get_page(page_number)
     return render(request, "base/admin/employee_list.html", context)
 
+
 @user_passes_test(lambda u: u.is_superuser)
 def employee_details(request, id):
     context = {}
     context["employee"] = get_object_or_404(Employee, pk=id)
     return render(request, "base/admin/employee_details.html", context)
+
 
 @user_passes_test(lambda u: u.is_superuser)
 def create_employee(request):
@@ -328,6 +351,8 @@ def create_employee(request):
     return render(request, "base/admin/employee_create.html", context)
 
 # PROFILE
+
+
 @login_required
 def profile(request):
     context = {}
