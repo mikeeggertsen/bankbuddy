@@ -15,9 +15,11 @@ from django.db.models.functions import ExtractWeek, ExtractMonth, ExtractYear
 from django.db.models import Count
 from django.core.paginator import Paginator
 
+@login_required
+def index(request):
+    return redirect(reverse('base:dashboard'))
+
 # DASHBOARD
-
-
 @login_required
 def dashboard(request):
     context = {}
@@ -68,8 +70,6 @@ def dashboard(request):
         return render(request, 'base/dashboard.html', context)
 
 # CUSTOMERS
-
-
 @staff_member_required
 def customers(request):
     context = {}
