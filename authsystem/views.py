@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout
 from authsystem.forms import SignUpForm, SignInForm, VerifyForm
 from authsystem.models import VerificationCode
-from base.models import Bank, Customer, User
+from base.models import Customer, User
 
 def sign_in(request):
     context = {}
