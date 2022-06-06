@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from authsystem.forms import SignUpForm
+from base.constants import MANAGER
 from base.forms import AccountForm, EmployeeForm, LoanForm, LoanStatusForm, ProfileForm, RankForm, TransactionForm
 from django.urls import reverse
 from django.contrib.auth import update_session_auth_hash
@@ -216,15 +217,18 @@ def loans(request):
 @user_passes_test(lambda u: u.is_staff or get_object_or_404(Customer, pk=u.id).rank > 1)
 def loan_details(request, account_no):
     context = {}
+    employee = Employee.objects.filter(email=request.user.email)
+    context["employee"] = employee
     loan = get_object_or_404(Loan, account_no=account_no)
     if request.method == "POST":
-        form = LoanStatusForm(request.POST)
-        if form.is_valid():
-            status = form.cleaned_data["status"]
-            if status == 2:
-                Loan.approve_loan(loan)
-            loan.status = status
-            loan.save()
+        if employee.role == MANAGER:
+            form = LoanStatusForm(request.POST)
+            if form.is_valid():
+                status = form.cleaned_data["status"]
+                if status == 2:
+                    Loan.approve_loan(loan)
+                loan.status = status
+                loan.save()
     context["loan"] = loan
     if request.user.is_staff:
         form = LoanStatusForm()
