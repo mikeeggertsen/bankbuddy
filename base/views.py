@@ -359,18 +359,24 @@ def profile(request):
     if request.method == "POST":
         form = ProfileForm(request.POST, instance=request.user)
         context["form"] = form
+        print(form.is_valid())
         if form.is_valid():
-            customer = form.save(commit=False)
+            user = form.save(commit=False)
             if form.cleaned_data["password"]:
-                customer.set_password(form.cleaned_data["password"])
-            customer.save()
+                user.set_password(form.cleaned_data["password"])
+            user.save()
             update_session_auth_hash(request, form.instance)
             return redirect(reverse('base:profile'))
         else:
             return render(request, 'base/profile_details.html', context)
 
-    customer = get_object_or_404(Customer, pk=request.user.id)
-    context["form"] = ProfileForm(instance=customer)
+    user = None
+    id = request.user.id
+    if request.user.is_staff:
+        user = get_object_or_404(Employee, pk=id)
+    else:
+        user = get_object_or_404(Customer, pk=id) 
+    context["form"] = ProfileForm(instance=user)
     return render(request, 'base/profile_details.html', context)
 
 

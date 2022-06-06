@@ -104,10 +104,10 @@ class TransactionForm(ModelForm):
 class ProfileForm(ModelForm):
     password = CharField(widget=PasswordInput, required=False)
     confirm_password = CharField(widget=PasswordInput, required=False)
-
+    rank = CharField(widget=TextInput, required=False)
     class Meta:
-        model = Customer
-        fields = ["first_name", "last_name", "phone", "email", "rank"]
+        model = User
+        fields = ["first_name", "last_name", "phone", "email"]
 
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)
