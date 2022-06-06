@@ -152,13 +152,13 @@ INTERNAL_IPS = [
 CELERY_BEAT_SCHEDULE = {
     "schduled_task": {
         "task": "base.tasks.run_scheduled_transactions",
-        "schedule": crontab(minute=0, hour=0) # Execute daily at midnight.
+        "schedule": crontab(minute=0, hour=0)  # Execute daily at midnight.
     }
 }
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = "smtp.zoho.eu"
-EMAIL_PORT = "465"
-EMAIL_HOST_USER = "m.eggertsen@hotmail.com"
+EMAIL_HOST = os.environ["EMAIL_HOST"]
+EMAIL_PORT = os.environ["EMAIL_PORT"]
+EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
 EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 EMAIL_USE_SSL = True
