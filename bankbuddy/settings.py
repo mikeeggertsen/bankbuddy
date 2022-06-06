@@ -155,10 +155,13 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute=0, hour=0) # Execute daily at midnight.
     }
 }
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# if DEBUG:
+#     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = "smtp.zoho.eu"
 EMAIL_PORT = "465"
 EMAIL_HOST_USER = "m.eggertsen@hotmail.com"
 EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 EMAIL_USE_SSL = True
+
+DEFAULT_DOMAIN = os.environ["DEFAULT_DOMAIN"]
+DEFAULT_PROTOCOL = os.environ["DEFAULT_PROTOCOL"]

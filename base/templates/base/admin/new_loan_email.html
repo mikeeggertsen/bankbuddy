@@ -1,0 +1,12 @@
+{% autoescape off %}
+Hi {{ name }}.
+
+Since you are a manager, we would like to inform you that there has been a applied for a new loan.
+
+At your convinence, please go to the following link to review the loan.
+
+{{ protocol }}://{{ domain }}{% url 'base:loan' account_no=account_no %}
+
+Sincerly BBLB (BankBuddy Loan Bot)
+
+{% endautoescape %}
