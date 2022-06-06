@@ -30,7 +30,8 @@ SECRET_KEY = 'django-insecure-6&#bkr%r@n@%6k4^kpw51b2fmcqoh5-s!*-18jj8m8(n=b3seu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [os.environ["ALLOWED_HOSTS"]]
+CSRF_TRUSTED_ORIGINS = [os.environ["CSRF_TRUSTED_ORIGINS"]]
 
 
 # Application definition
@@ -152,14 +153,15 @@ INTERNAL_IPS = [
 CELERY_BEAT_SCHEDULE = {
     "schduled_task": {
         "task": "base.tasks.run_scheduled_transactions",
-        "schedule": crontab(minute=0, hour=0) # Execute daily at midnight.
+        "schedule": crontab(minute=0, hour=0)  # Execute daily at midnight.
     }
 }
-# if DEBUG:
-#     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST = "smtp.zoho.eu"
-EMAIL_PORT = "465"
-EMAIL_HOST_USER = "m.eggertsen@hotmail.com"
+
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = os.environ["EMAIL_HOST"]
+EMAIL_PORT = os.environ["EMAIL_PORT"]
+EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
 EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 EMAIL_USE_SSL = True
 

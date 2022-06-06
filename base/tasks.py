@@ -4,6 +4,7 @@ from celery import shared_task
 from .models import Account, Ledger, ScheduledLedger
 from django.utils import timezone
 
+
 @shared_task
 def run_scheduled_transactions():
     now = timezone.now().date()
