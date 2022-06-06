@@ -1,5 +1,5 @@
 from django.forms import EmailField, Form, CharField, ModelForm, PasswordInput, TextInput
-from base.models import Customer
+from base.models import Bank, Customer
 
 class SignInForm(Form): 
     email = EmailField(widget=TextInput(attrs={'placeholder': 'Email'}))
@@ -35,8 +35,8 @@ class SignUpForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(SignUpForm, self).__init__(*args, **kwargs)
-        self.fields["bank"].empty_label = "Select a bank"
-
+        self.initial["bank"] = Bank.objects.filter(external=False)
+        
         for field in self.fields:
             self.fields[field].widget.attrs.update({
                 'class': 'bb-input'

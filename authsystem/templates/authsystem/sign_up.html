@@ -8,12 +8,8 @@
             <form class="flex flex-col gap-2" method="POST">
                {% csrf_token %}
                <div class="flex flex-col gap-4">
-                  <div class="flex flex-col">
-                     <label class="text-[12px] font-semibold" for="bank">Bank</label>
+                  <div class="hidden">
                      {{form.bank}}
-                     {% for error in form.bank.errors %}
-                           <p class="text-red-500 text-[12px]">{{error}}</p>
-                     {% endfor %}
                   </div>
                   <div class="flex flex-col">
                      <label class="text-[12px] font-semibold" for="first_name">Firstname</label>

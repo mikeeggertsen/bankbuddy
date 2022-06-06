@@ -52,9 +52,7 @@ def sign_up(request):
                 context["error"] = "Unable to create customer account. Please try again"
         return render(request, "authsystem/sign_up.html", context)
     
-    form = SignUpForm()
-    form["bank"].queryset = Bank.objects.all()
-    context["form"] = form
+    context["form"] = SignUpForm()
     return render(request, "authsystem/sign_up.html", context)
 
 def verify(request):
