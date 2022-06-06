@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout
@@ -78,8 +77,7 @@ def verify(request):
             if user_id:
                 user = get_object_or_404(User, pk=user_id)
                 if user:
-                    if not settings.DEBUG: #login fails when tests run because of session not being on request object
-                        login(request, user)
+                    login(request, user)
                     return redirect(reverse("base:dashboard"))
             else:
                 context["error"] = "Invalid verification code"

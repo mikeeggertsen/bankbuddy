@@ -14,12 +14,12 @@ def send_sms(msg_content, phone):
 ) 
 
 
-def send_email(subject, message, recepient):
+def send_email(subject, message, recepients):
     send_mail(
     subject,
     message,
     'kontakt@mikeeggertsen.com',
-    [recepient],
+    recepients,
     fail_silently=False,
 )
  

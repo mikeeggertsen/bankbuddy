@@ -5,6 +5,7 @@
         <h1 class="text-2xl font-semibold">Employees</h1>
     <a href="/employees/new" class="text-[12px] bg-primary rounded-lg w-6 h-6 flex items-center justify-center"><i class="fa solid fa-plus text-white"></i></a>
    </div>
+   <div class="flex flex-col gap-4">
     {% for employee in employees %}
     <a href="/employees/{{employee.id}}">
         <div class="card rounded-lg shadow-md p-4 flex flex-col justify-between gap-2">
@@ -24,6 +25,7 @@
         </div>
     </a>
     {% endfor %}
+   </div>
     {% if employees.has_previous %}
         <div class="absolute left-6 bottom-20">
             <a class="bg-white p-2 rounded-lg shadow-md" href="?page=1">&laquo; first</a>
