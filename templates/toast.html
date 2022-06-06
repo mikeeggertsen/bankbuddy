@@ -1,4 +1,4 @@
-<div id="container" class="absolute bottom-0 left-1/2 -translate-x-1/2 bg-primary w-2/3 py-2 px-6 z-10 rounded-lg transition-all duration-500">
+<div id="container" class="fixed -bottom-10 left-1/2 -translate-x-1/2 bg-primary w-2/3 py-2 px-6 z-10 rounded-lg transition-all duration-500">
     <p class="text-white text-center" id="toast_msg"></p>
 </div>
 <script>
@@ -7,12 +7,12 @@
         const data = JSON.parse(e.data);
         const container = document.getElementById("container")
         container.classList.toggle("bottom-24")
-        container.classList.toggle("bottom-0")
+        container.classList.toggle("-bottom-10")
         const msg = document.getElementById("toast_msg")
         msg.innerText = data.message
         setTimeout(() => {
             container.classList.toggle("bottom-24")
-            container.classList.toggle("bottom-0")
+            container.classList.toggle("-bottom-10")
             msg.innerText = ""
         }, 3000)
     };
