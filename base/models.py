@@ -243,7 +243,7 @@ class Ledger(BaseLedger):
             )
     
     def __str__(self):
-        return f"Account no: {self.account.account_no} type: {TRANSACTION_TYPES[self.type - 1][1]} amount: {self.amount}"
+        return f"Account: {self.account} Loan: {self.loan} type: {TRANSACTION_TYPES[self.type - 1][1]} amount: {self.amount}"
 
 class ScheduledLedger(BaseLedger):
     scheduled_date = models.DateField()
