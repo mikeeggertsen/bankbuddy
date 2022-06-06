@@ -150,7 +150,7 @@ INTERNAL_IPS = [
 ]
 
 CRONJOBS = [
-    ('0 0 * * *', 'base.tasks.run_scheduled_transactions')
+    ('0 0 * * *', 'base.tasks.run_scheduled_transactions')  # runs every day at 00:00
 ]
 
 if DEBUG:
