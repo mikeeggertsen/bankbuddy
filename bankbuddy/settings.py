@@ -45,8 +45,8 @@ INSTALLED_APPS = [
     'fontawesomefree',
     'tailwind',
     'theme',
-    'django_browser_reload',
     'django_crontab',
+    'channels',
     'base.apps.BaseConfig',
     'authsystem.apps.AuthsystemConfig',
 ]
@@ -59,7 +59,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 ROOT_URLCONF = 'bankbuddy.urls'
@@ -83,7 +82,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'bankbuddy.wsgi.application'
-
+ASGI_APPLICATION = "bankbuddy.asgi.application"
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
