@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, api
 
 app_name = "base"
 
@@ -16,10 +16,11 @@ urlpatterns = [
     path("loans/", views.loans, name="loans"),
     path("loans/<int:account_no>", views.loan_details, name="loan"),
     path("loans/apply", views.apply_loan, name="apply_loan"),
-    path("loans/<int:account_no>/payment", views.loan_payment, name="loan_payment"),
+    path("loans/<int:account_no>/payment",
+         views.loan_payment, name="loan_payment"),
     path("employees/", views.employees, name="employees"),
     path("employees/new", views.create_employee, name="create_employee"),
     path("employees/<int:id>", views.employee_details, name="create_employee"),
     path("profile/", views.profile, name="profile"),
-    path("transfer-request/", views.transfer_request, name="transfer_request")
+    path("transfer-request/", api.transfer_request, name="transfer_request")
 ]
