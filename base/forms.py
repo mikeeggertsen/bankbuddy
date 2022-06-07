@@ -35,7 +35,7 @@ class TransactionForm(ModelForm):
     to_account = CharField()
     own_message = CharField(max_length=255)
     scheduled_date = DateField(required=False)
-    debt = CharField()
+    debt = CharField(required=False)
     class Meta:
         model = Ledger
         fields = ["account", "amount", "message"]
