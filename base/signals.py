@@ -44,7 +44,7 @@ def send_new_loan_mail(sender, instance, created, **kwargs):
     
 @receiver(post_save, sender=Ledger, dispatch_uid=uuid.uuid4())
 def send_transaction_toast(sender, instance, created, **kwargs):
-    if instance.type == CREDIT and not created:
+    if instance.type == CREDIT and instance.account and not created:
         channel_layer = get_channel_layer()
         message = f"You just received ${instance.amount}"
         async_to_sync(channel_layer.group_send)(
