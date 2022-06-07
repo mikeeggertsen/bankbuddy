@@ -46,7 +46,8 @@ def dashboard(request):
 
         transactions = []
         labels = []
-        for record in data_set:
+        ordered_data = data_set.all().order_by('label')
+        for record in ordered_data:
             transactions.append(record['count'])
             labels.append(record['label'])
             context["transactions"] = transactions
