@@ -7,7 +7,11 @@
         <div class="w-full mt-4 h-40 bg-gradient-to-r from-[#485563] to-[#29323c] shadow-xl rounded-lg p-6">
             <div class="flex flex-col justify-between h-full">
                 <div>
+                   <div class="flex flex-row justify-between items-center">
                     <h2 class="text-xl text-white font-semibold">{{loan.name}}</h2>
+                    <a class="text-sm text-white" href="/customers/{{loan.customer.id}}">Go to customer</a>
+                   </div>
+
                     <p class="text-white text-[12px]">Status: {{loan.get_status_display}}</p>
                  </div>
                 <div>
