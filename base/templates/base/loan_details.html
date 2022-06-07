@@ -9,7 +9,9 @@
                 <div>
                    <div class="flex flex-row justify-between items-center">
                     <h2 class="text-xl text-white font-semibold">{{loan.name}}</h2>
-                    <a class="text-sm text-white" href="/customers/{{loan.customer.id}}">Go to customer</a>
+                    {% if user.is_staff %}
+                        <a class="text-sm text-white" href="/customers/{{loan.customer.id}}">Go to customer</a>
+                    {% endif %}
                    </div>
 
                     <p class="text-white text-[12px]">Status: {{loan.get_status_display}}</p>
