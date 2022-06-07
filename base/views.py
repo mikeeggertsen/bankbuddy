@@ -295,14 +295,21 @@ def apply_loan(request):
 @user_passes_test(lambda u: get_object_or_404(Customer, pk=u.id).rank > 1)
 def loan_payment(request, account_no):
     context = {}
-    is_loan = True
-    form = TransactionForm(is_loan)
-    if request.method == "POST":
+    loan = None
+    try:
         loan = get_object_or_404(Loan, account_no=account_no)
+    except Http404:
+        context["error"] = "Loan doesn't exists"
+        return render(request, "base/loan_payment.html", context)
+
+    form = TransactionForm(loan)
+    form.fields["account"].queryset = Account.objects.filter(customer__id=request.user.id)
+    form.fields["to_account"].initial = account_no
+    if request.method == "POST":
         data = request.POST.copy()
         msg = f"{loan.name} loan payment"
         data.update({"message": msg, "own_message": msg})
-        form = TransactionForm(is_loan, data=data)
+        form = TransactionForm(loan, data=data)
         if form.is_valid():
             account = form.cleaned_data["account"]
             amount = form.cleaned_data["amount"]
@@ -317,14 +324,11 @@ def loan_payment(request, account_no):
                     own_message=own_message,
                     message=message,
                 )
-            else:
-                context["error"] = "Failed to make payment on loan"
             return redirect(reverse('base:loan', kwargs={"account_no": account_no}))
-        form.fields["to_account"].initial = account_no
-        context["form"] = form
-        return render(request, "base/loan_payment.html", context)
-
-    form.fields["to_account"].initial = account_no
+        else:
+            context["form"] = form
+            context["error"] = "Failed to make payment on loan"
+    
     context["form"] = form
     return render(request, "base/loan_payment.html", context)
 

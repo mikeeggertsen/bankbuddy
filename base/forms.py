@@ -35,7 +35,7 @@ class TransactionForm(ModelForm):
     to_account = CharField()
     own_message = CharField(max_length=255)
     scheduled_date = DateField(required=False)
-
+    debt = CharField()
     class Meta:
         model = Ledger
         fields = ["account", "amount", "message"]
@@ -48,7 +48,7 @@ class TransactionForm(ModelForm):
             }),
         }
 
-    def __init__(self, is_loan, *args, **kwargs):
+    def __init__(self, loan, *args, **kwargs):
         super(TransactionForm, self).__init__(*args, **kwargs)
         self.fields['own_message'].widget.attrs['placeholder'] = 'Message to your account'
         self.fields["to_account"].widget.attrs['placeholder'] = "Account no."
@@ -65,8 +65,10 @@ class TransactionForm(ModelForm):
                 'class': 'bb-input',
             })
 
-        self.is_loan = is_loan
-        if is_loan:
+        self.loan = loan
+        if loan:
+            self.fields["debt"].initial = f"${self.loan.amount}"
+            self.fields["debt"].widget.attrs["readonly"] = True
             self.fields["to_account"].widget.attrs["readonly"] = True
 
     def clean_scheduled_date(self):
@@ -89,12 +91,15 @@ class TransactionForm(ModelForm):
             raise ValidationError(
                 {"amount": "Amount must be a greater than $0"})
 
+        if self.loan and self.loan.amount < amount:
+            raise ValidationError({"debt": "Amount must be less than total debt"})
+
         if bank is None:
-            if self.is_loan and not Loan.objects.filter(account_no=to_account).exists():
+            if self.loan and not Loan.objects.filter(account_no=to_account).exists():
                 raise ValidationError(
                     "No account exists with this account no.")
 
-            if not self.is_loan and not Account.objects.filter(account_no=to_account).exists():
+            if not self.loan and not Account.objects.filter(account_no=to_account).exists():
                 raise ValidationError(
                     "No account exists with this account no.")
 
