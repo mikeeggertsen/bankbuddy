@@ -155,7 +155,7 @@ class Loan(BaseAccount):
 
     @property
     def percent_finish(self):
-        return self.total_paid / self.amount * 100
+        return "{:.2f}".format(self.total_paid / self.amount * 100)
 
     @property
     def transactions(self):
