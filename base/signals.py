@@ -13,7 +13,7 @@ import uuid
 @receiver(post_save, sender=Loan, dispatch_uid=uuid.uuid4())
 def send_new_loan_mail(sender, instance, created, **kwargs):
     managers = Employee.objects.filter(role=MANAGER)
-    if not created:
+    if created:
         for manager in managers:
             send_email(
                 "BankBuddy - New loan",
@@ -25,26 +25,26 @@ def send_new_loan_mail(sender, instance, created, **kwargs):
                 }),
                 [manager.email]
         )
+    else: 
+        channel_layer = get_channel_layer()
+        status = instance.status
+        message = "Your loan has been changed to pending"
+        if status == APPROVED:
+            message = f"Your {instance.name} loan has been approved!"
+        elif status == REJECTED:
+            message = f"Your {instance.name} loan has been rejected"
 
-    channel_layer = get_channel_layer()
-    status = instance.status
-    message = "Your loan has been changed to pending"
-    if status == APPROVED:
-        message = f"Your {instance.name} loan has been approved!"
-    elif status == REJECTED:
-        message = f"Your {instance.name} loan has been rejected"
-
-    async_to_sync(channel_layer.group_send)(
-        str(instance.customer.id),
-        {
-            'type': 'send_notification',
-            'message': message,
-        }
-    )
+        async_to_sync(channel_layer.group_send)(
+            str(instance.customer.id),
+            {
+                'type': 'send_notification',
+                'message': message,
+            }
+        )
     
 @receiver(post_save, sender=Ledger, dispatch_uid=uuid.uuid4())
 def send_transaction_toast(sender, instance, created, **kwargs):
-    if instance.type == CREDIT and instance.account and not created:
+    if instance.type == CREDIT and instance.account and created:
         channel_layer = get_channel_layer()
         message = f"You just received ${instance.amount}"
         async_to_sync(channel_layer.group_send)(

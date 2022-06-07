@@ -1,21 +1,38 @@
-<div id="container" class="fixed -bottom-10 left-1/2 -translate-x-1/2 bg-primary w-2/3 py-2 px-6 z-10 rounded-lg transition-all duration-500">
-    <p class="text-white text-center" id="toast_msg"></p>
+<div id="container" class="fixed flex flex-col gap-4 -bottom-20 left-1/2 -translate-x-1/2 w-2/3 transition-all duration-500">
 </div>
 <script>
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
     const socket = new WebSocket(`${protocol}://${window.location.host}/{{user.id}}/`)
+    let count = 1
+    let isVisible = false
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         const container = document.getElementById("container")
-        container.classList.toggle("bottom-24")
-        container.classList.toggle("-bottom-10")
-        const msg = document.getElementById("toast_msg")
-        msg.innerText = data.message
-        setTimeout(() => {
+        const toast = document.createElement('div');
+        const toastId = `toast_id_${count}`
+        toast.classList.add("bg-primary", "py-2", "px-6", "z-10", "rounded-lg", "transition-all", "duration-500")
+        toast.setAttribute("id", toastId)
+        const p = document.createElement('p');
+        p.classList.add("text-white", "text-center")
+        p.innerText = data.message
+        toast.appendChild(p)
+        container.appendChild(toast)
+        
+        if(!isVisible) {
+            isVisible = true
             container.classList.toggle("bottom-24")
-            container.classList.toggle("-bottom-10")
-            msg.innerText = ""
-        }, 3000)
+            container.classList.toggle("-bottom-20")
+            setTimeout(() => {
+                container.classList.toggle("bottom-24")
+                container.classList.toggle("-bottom-20")
+                isVisible = false
+            }, 3000)
+        }
+        setTimeout(() => {
+            const toastElem = document.getElementById(toastId)
+            toastElem.remove()
+        }, 5000)
+        count++
     };
 
     socket.onclose = function(e) {
