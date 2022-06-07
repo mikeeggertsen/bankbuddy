@@ -131,13 +131,6 @@ class ProfileForm(ModelForm):
             raise ValidationError("User with this email already exists")
         return email
 
-    def clean_phone(self):
-        cleaned_data = super(ProfileForm, self).clean()
-        phone = cleaned_data["phone"]
-        if User.objects.filter(phone=phone).exclude(pk=self.instance.pk).exists():
-            raise ValidationError("User with this phone no. already exists")
-        return phone
-
     def clean(self):
         cleaned_data = super(ProfileForm, self).clean()
         password = cleaned_data["password"]
