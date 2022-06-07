@@ -17,8 +17,31 @@
         <p class="text-sm text-gray-400">You have no accounts</p>
       {% endfor %}
     </div>
-    <a href="/accounts/new" class="bg-primary absolute bottom-0 right-0 flex items-center justify-center rounded-full w-16 h-16 z-10 shadow-2xl">
+    <a href="/accounts/new" class="bg-primary absolute bottom-12 right-0 flex items-center justify-center rounded-full w-16 h-16 z-10 shadow-2xl">
       <i class="fa-solid fa-plus text-3xl text-white"></i>
     </a>
+    {% if accounts.has_previous %}
+    <div class="absolute left-6 bottom-0">
+        <a class="bg-white p-2 rounded-lg shadow-md" href="?page=1">&laquo; first</a>
+        <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ accounts.previous_page_number }}">prev</a>
+    </div>
+    {% endif %}
+
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2">
+        <p class="text-[12px]">Page {{ accounts.number }} of {{ accounts.paginator.num_pages }}.</p>
+    </div>
+
+    {% if accounts.has_next %}
+        <div class="absolute right-6 bottom-0">
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ accounts.next_page_number }}">next</a>
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ accounts.paginator.num_pages }}">last &raquo;</a>
+        </div>
+    {% endif %}
+    {% if accounts.has_next %}
+        <div class="absolute right-6 bottom-0">
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ accounts.next_page_number }}">next</a>
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ accounts.paginator.num_pages }}">last &raquo;</a>
+        </div>
+    {% endif %}
   </div>
 {% endblock content %}

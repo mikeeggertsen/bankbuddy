@@ -77,7 +77,7 @@ def dashboard(request):
 def customers(request):
     context = {}
     customers = Customer.objects.all().order_by("-created_at")
-    paginator = Paginator(customers, 10)
+    paginator = Paginator(customers, 4)
     page_number = request.GET.get('page')
     context["customers"] = paginator.get_page(page_number)
     return render(request, "base/admin/customer_list.html", context)
@@ -117,11 +117,16 @@ def create_customer(request):
 @login_required
 def accounts(request):
     context = {}
-    if request.user.is_staff:
-        context['accounts'] = Account.objects.all().order_by("-created_at")
-    else:
-        context['accounts'] = Account.objects.filter(
+
+    accounts = Account.objects.filter(
             customer__id=request.user.id).order_by("-created_at")
+
+    if request.user.is_staff:
+        accounts = Account.objects.all().order_by("-created_at")
+
+    paginator = Paginator(accounts, 3)
+    page_number = request.GET.get('page')
+    context["accounts"] = paginator.get_page(page_number)
     return render(request, 'base/account_list.html', context)
 
 
@@ -228,11 +233,17 @@ def create_transaction(request):
 @login_required
 def loans(request):
     context = {}
+  
+    loans = Loan.objects.filter(customer__id=request.user.id)
+
     if request.user.is_staff:
-        context["loans"] = Loan.objects.all().order_by("-created_at")
+        loans = Loan.objects.all().order_by("-created_at")
     else:
-        context["loans"] = Loan.objects.filter(customer__id=request.user.id)
         context["customer"] = get_object_or_404(Customer, pk=request.user.id)
+
+    paginator = Paginator(loans, 3)
+    page_number = request.GET.get('page')
+    context["loans"] = paginator.get_page(page_number)
     return render(request, "base/loan_list.html", context)
 
 
@@ -322,7 +333,7 @@ def loan_payment(request, account_no):
 def employees(request):
     context = {}
     employees = Employee.objects.all().order_by("-created_at")
-    paginator = Paginator(employees, 10)
+    paginator = Paginator(employees, 4)
     page_number = request.GET.get('page')
     context["employees"] = paginator.get_page(page_number)
     return render(request, "base/admin/employee_list.html", context)

@@ -42,10 +42,33 @@
         {% endfor %}
         {% if customer %}
             {% if customer.rank > 1 %}
-                <a href="/loans/apply" class="bg-primary absolute bottom-0 right-0 flex items-center justify-center rounded-full w-16 h-16 z-10 shadow-2xl">
+                <a href="/loans/apply" class="bg-primary absolute bottom-12 right-0 flex items-center justify-center rounded-full w-16 h-16 z-10 shadow-2xl">
                     <i class="fa-solid fa-file-signature pl-2 text-3xl text-white"></i>
                 </a>
             {% endif %}
+        {% endif %}
+        {% if loans.has_previous %}
+        <div class="absolute left-6 bottom-0">
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page=1">&laquo; first</a>
+            <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ loans.previous_page_number }}">prev</a>
+        </div>
+        {% endif %}
+    
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2">
+            <p class="text-[12px]">Page {{ loans.number }} of {{ loans.paginator.num_pages }}.</p>
+        </div>
+    
+        {% if loans.has_next %}
+            <div class="absolute right-6 bottom-0">
+                <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ loans.next_page_number }}">next</a>
+                <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ loans.paginator.num_pages }}">last &raquo;</a>
+            </div>
+        {% endif %}
+        {% if loans.has_next %}
+            <div class="absolute right-6 bottom-0">
+                <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ loans.next_page_number }}">next</a>
+                <a class="bg-white p-2 rounded-lg shadow-md" href="?page={{ loans.paginator.num_pages }}">last &raquo;</a>
+            </div>
         {% endif %}
     </div>
 {% endblock %}
