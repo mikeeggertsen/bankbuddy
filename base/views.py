@@ -251,8 +251,9 @@ def loans(request):
 @user_passes_test(lambda u: u.is_staff or get_object_or_404(Customer, pk=u.id).rank > 1)
 def loan_details(request, account_no):
     context = {}
-    employee = Employee.objects.get(email=request.user.email)
-    context["employee"] = employee
+    if request.user.is_staff:
+        employee = Employee.objects.get(email=request.user.email)
+        context["employee"] = employee
     loan = get_object_or_404(Loan, account_no=account_no)
     if request.method == "POST":
         if employee[0].role == MANAGER:
