@@ -119,7 +119,7 @@ def accounts(request):
     context = {}
 
     accounts = Account.objects.filter(
-            customer__id=request.user.id).order_by("-created_at")
+        customer__id=request.user.id).order_by("-created_at")
 
     if request.user.is_staff:
         accounts = Account.objects.all().order_by("-created_at")
@@ -198,7 +198,7 @@ def create_transaction(request):
                 )
                 return redirect(reverse('base:transfer'))
 
-            to_account = Account.objects.filter(account_no=account_no)
+            to_account = Account.objects.get(account_no=account_no)
 
             if scheduled_date:
                 ScheduledLedger.make_scheduled_transaction(
@@ -233,7 +233,7 @@ def create_transaction(request):
 @login_required
 def loans(request):
     context = {}
-  
+
     loans = Loan.objects.filter(customer__id=request.user.id)
 
     if request.user.is_staff:
